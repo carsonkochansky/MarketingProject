@@ -1499,6 +1499,12 @@
       <div class="form-hint">This is appended to the AI system prompt when this client is selected.</div>
     </div>
 
+    <div class="form-group">
+      <label class="form-label">Client Email</label>
+      <input type="email" class="form-input" id="c-email" placeholder="client@company.com" />
+      <div class="form-hint">Used to send approval emails before posting.</div>
+    </div>
+
     <div style="font-size:12px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">Social Handles (for Quick Post)</div>
     <div class="form-group">
       <label class="form-label">LinkedIn Profile URL</label>
@@ -1870,12 +1876,50 @@ function renderQuickPostButtons(text, client, format) {
   state.quickPostText   = text;
   state.quickPostClient = client || null;
 
+  const clientEmail = client?.email || '';
+  const approvalBtn = clientEmail
+    ? `<button class="btn btn-secondary btn-sm" onclick="sendApprovalEmail()">✉ Send for Approval</button>`
+    : '';
+
   container.innerHTML = `
+    ${approvalBtn}
     <button class="btn btn-ordinal btn-sm" onclick="openQuickPostModal('ordinal')">
       ✦ Post to Ordinal
     </button>`;
 
   section.classList.add('visible');
+}
+
+function sendApprovalEmail() {
+  const client  = state.quickPostClient;
+  const text    = state.quickPostText;
+  const settings = getSettings();
+  const sender  = settings.userName || 'Your content team';
+
+  if (!client?.email) {
+    toast('Add a client email in their profile to use this feature.', 'error');
+    return;
+  }
+
+  const subject = encodeURIComponent(`Content ready for your review — ${client.name}`);
+  const body    = encodeURIComponent(
+`Hi ${client.name},
+
+Here's your content draft for review. Please look it over and let me know if you'd like any changes before it goes live.
+
+---
+
+${text}
+
+---
+
+Reply to this email with any edits, or give me the green light and I'll schedule it right away.
+
+${sender}`
+  );
+
+  window.open(`mailto:${client.email}?subject=${subject}&body=${body}`);
+  toast(`Approval email opened for ${client.name}`, 'success');
 }
 
 function openQuickPostModal(platform) {
@@ -2126,6 +2170,11 @@ function loadHistoryItem(id) {
     state.lastFormat = item.format;
     state.lastTone = item.tone;
 
+    // Show Post to Ordinal button
+    const clients = getClients();
+    const client = clients.find(c => c.name === item.clientName) || null;
+    renderQuickPostButtons(item.output, client, item.format);
+
     toast('History item loaded!');
   }, 100);
 }
@@ -2184,6 +2233,7 @@ function openClientModal(id = null) {
     document.getElementById('c-company').value = client.company || '';
     document.getElementById('c-industry').value = client.industry || '';
     document.getElementById('c-voice').value = client.voice || '';
+    document.getElementById('c-email').value = client.email || '';
     document.getElementById('c-linkedin').value = client.linkedin || '';
     document.getElementById('c-twitter').value = client.twitter || '';
     document.getElementById('c-instagram').value = client.instagram || '';
@@ -2193,6 +2243,7 @@ function openClientModal(id = null) {
     document.getElementById('c-company').value = '';
     document.getElementById('c-industry').value = '';
     document.getElementById('c-voice').value = '';
+    document.getElementById('c-email').value = '';
     document.getElementById('c-linkedin').value = '';
     document.getElementById('c-twitter').value = '';
     document.getElementById('c-instagram').value = '';
@@ -2217,6 +2268,7 @@ function saveClient() {
     company: document.getElementById('c-company').value.trim(),
     industry: document.getElementById('c-industry').value.trim(),
     voice: document.getElementById('c-voice').value.trim(),
+    email: document.getElementById('c-email').value.trim(),
     linkedin: document.getElementById('c-linkedin').value.trim(),
     twitter: document.getElementById('c-twitter').value.trim().replace(/^@/, ''),
     instagram: document.getElementById('c-instagram').value.trim().replace(/^@/, '')
