@@ -1861,7 +1861,21 @@ async function confirmQuickPost() {
   }
 }
 
+async function fetchOrdinalProfiles(apiKey) {
+  const res = await fetch('https://app.tryordinal.com/api/v1/profiles', {
+    headers: { 'Authorization': `Bearer ${apiKey}` }
+  });
+  if (!res.ok) throw new Error(`Could not fetch profiles: ${res.status}`);
+  const profiles = await res.json();
+  lsSet('reflow_ordinal_profiles', profiles);
+  return profiles;
+}
+
 async function postToOrdinal(text, apiKey) {
+  // Load saved profiles, fetch fresh if none stored
+  let profiles = ls('reflow_ordinal_profiles', null);
+  if (!profiles) profiles = await fetchOrdinalProfiles(apiKey);
+
   const now = new Date();
   now.setMinutes(now.getMinutes() + 2);
   const publishAt = now.toISOString();
@@ -1869,10 +1883,30 @@ async function postToOrdinal(text, apiKey) {
   const body = {
     title: `ReFlow — ${new Date().toLocaleDateString()}`,
     status: 'ToDo',
-    publishAt,
-    linkedIn: { copy: text },
-    x: { copy: text.substring(0, 280) }
+    publishAt
   };
+
+  // Add LinkedIn channel if profile found
+  const liProfile = profiles.find(p => p.channel === 'LinkedIn');
+  if (liProfile) {
+    body.linkedIn = { profileId: liProfile.id, copy: text };
+  }
+
+  // Add Twitter/X channel if profile found
+  const xProfile = profiles.find(p => p.channel === 'Twitter');
+  if (xProfile) {
+    body.x = { profileId: xProfile.id, tweets: [{ copy: text.substring(0, 280) }] };
+  }
+
+  // Add Instagram channel if profile found
+  const igProfile = profiles.find(p => p.channel === 'Instagram');
+  if (igProfile) {
+    body.instagram = { profileId: igProfile.id, copy: text };
+  }
+
+  if (!body.linkedIn && !body.x && !body.instagram) {
+    throw new Error('No connected social profiles found in Ordinal. Connect at least one account in your Ordinal dashboard.');
+  }
 
   const res = await fetch('https://app.tryordinal.com/api/v1/posts', {
     method: 'POST',
@@ -2119,7 +2153,19 @@ function saveSettings() {
   lsSet('reflow_settings', settings);
   updateApiStatus();
   updateSidebarUser();
-  toast('Settings saved!', 'success');
+
+  // Auto-fetch Ordinal profiles when key is saved
+  if (settings.ordinalApiKey) {
+    lsSet('reflow_ordinal_profiles', null); // clear cache so fresh fetch happens
+    fetchOrdinalProfiles(settings.ordinalApiKey)
+      .then(profiles => {
+        const names = profiles.map(p => p.name || p.channel).join(', ');
+        toast(`Settings saved! Ordinal connected — found: ${names}`, 'success');
+      })
+      .catch(() => toast('Settings saved! (Could not verify Ordinal profiles — check your key)', ''));
+  } else {
+    toast('Settings saved!', 'success');
+  }
 }
 
 // ─── LINKEDIN OAUTH ───────────────────────────────────────
