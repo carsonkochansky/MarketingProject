@@ -1436,24 +1436,42 @@
 
 <!-- QUICK POST CONFIRMATION MODAL -->
 <div class="modal-overlay" id="quickPostModal">
-  <div class="modal" style="max-width:580px;">
+  <div class="modal" style="max-width:600px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-      <h3 style="margin-bottom:0;" id="qp-modal-title">Post to Twitter/X</h3>
+      <h3 style="margin-bottom:0;" id="qp-modal-title">✦ Post to Ordinal</h3>
       <button class="banner-close" onclick="closeQuickPostModal()" style="color:var(--text-light);font-size:20px;">✕</button>
     </div>
     <p style="font-size:13px;color:var(--text-light);margin-bottom:16px;" id="qp-modal-sub">Review your content before posting.</p>
 
-    <div style="background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);padding:16px;max-height:280px;overflow-y:auto;font-size:14px;line-height:1.7;white-space:pre-wrap;color:var(--text-dark);" id="qp-preview"></div>
+    <!-- Content preview -->
+    <div style="background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);padding:16px;max-height:200px;overflow-y:auto;font-size:14px;line-height:1.7;white-space:pre-wrap;color:var(--text-dark);" id="qp-preview"></div>
+    <div id="qp-char-note" style="font-size:12px;color:var(--text-light);margin-top:6px;margin-bottom:16px;"></div>
 
-    <div id="qp-char-note" style="font-size:12px;color:var(--text-light);margin-top:8px;"></div>
-
-    <div id="qp-instagram-note" style="display:none;" class="alert alert-info" style="margin-top:12px;font-size:12px;">
-      Instagram doesn't support web compose links. Your caption has been copied — tap "Open Instagram" and paste it into your post.
+    <!-- Profiles selector -->
+    <div style="margin-bottom:16px;">
+      <label style="font-size:12px;font-weight:600;color:var(--text-dark);display:block;margin-bottom:8px;">POST TO</label>
+      <div id="qp-profiles-list" style="display:flex;flex-wrap:wrap;gap:8px;">
+        <span style="font-size:13px;color:var(--text-light);font-style:italic;">Loading profiles…</span>
+      </div>
     </div>
 
-    <div class="modal-actions" style="margin-top:20px;">
+    <!-- Schedule picker -->
+    <div style="margin-bottom:20px;">
+      <label style="font-size:12px;font-weight:600;color:var(--text-dark);display:block;margin-bottom:8px;">SCHEDULE FOR</label>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <input type="datetime-local" class="form-input" id="qp-schedule-time" style="flex:1;font-size:14px;" />
+        <button class="btn btn-secondary btn-sm" onclick="setScheduleNow()" style="white-space:nowrap;">Post Now</button>
+      </div>
+      <div style="font-size:12px;color:var(--text-light);margin-top:4px;">Leave blank or click "Post Now" to send immediately</div>
+    </div>
+
+    <div id="qp-instagram-note" style="display:none;" class="alert alert-info" style="margin-top:12px;font-size:12px;">
+      Instagram doesn't support web compose links. Your caption has been copied — paste it into your post.
+    </div>
+
+    <div class="modal-actions" style="margin-top:4px;">
       <button class="btn btn-secondary" onclick="closeQuickPostModal()">Cancel</button>
-      <button class="btn" id="qp-confirm-btn" onclick="confirmQuickPost()">Post Now</button>
+      <button class="btn btn-ordinal" id="qp-confirm-btn" onclick="confirmQuickPost()">✦ Send to Ordinal</button>
     </div>
   </div>
 </div>
@@ -1863,31 +1881,75 @@ function renderQuickPostButtons(text, client, format) {
 function openQuickPostModal(platform) {
   pendingPost.platform = platform;
 
-  const text       = state.quickPostText;
-  const modal      = document.getElementById('quickPostModal');
-  const titleEl    = document.getElementById('qp-modal-title');
-  const subEl      = document.getElementById('qp-modal-sub');
-  const preview    = document.getElementById('qp-preview');
-  const noteEl     = document.getElementById('qp-char-note');
-  const igNote     = document.getElementById('qp-instagram-note');
-  const confirmBtn = document.getElementById('qp-confirm-btn');
+  const text    = state.quickPostText;
+  const modal   = document.getElementById('quickPostModal');
+  const preview = document.getElementById('qp-preview');
+  const noteEl  = document.getElementById('qp-char-note');
 
-  igNote.style.display = 'none';
+  document.getElementById('qp-instagram-note').style.display = 'none';
 
-  const settings = getSettings();
-  const hasKey   = !!settings.ordinalApiKey;
-
-  titleEl.textContent    = '✦ Post to Ordinal';
-  subEl.textContent      = hasKey
-    ? 'Review your content below and hit "Send to Ordinal" — it will be queued in your Ordinal dashboard for all connected platforms.'
-    : 'Add your Ordinal API key in Settings first, then come back here to post.';
-  confirmBtn.textContent = '✦ Send to Ordinal';
-  confirmBtn.className   = 'btn btn-ordinal';
-  noteEl.textContent     = `${text.trim().split(/\s+/).length} words · ${text.length} characters`;
-  noteEl.style.color     = 'var(--text-light)';
-
+  noteEl.textContent = `${text.trim().split(/\s+/).length} words · ${text.length} characters`;
   preview.textContent = text;
+
+  // Set default schedule to tomorrow 9am
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(9, 0, 0, 0);
+  const pad = n => String(n).padStart(2, '0');
+  document.getElementById('qp-schedule-time').value =
+    `${tomorrow.getFullYear()}-${pad(tomorrow.getMonth()+1)}-${pad(tomorrow.getDate())}T09:00`;
+
+  // Populate profiles
+  populateProfilesSelector();
+
   modal.classList.add('open');
+}
+
+function populateProfilesSelector() {
+  const container = document.getElementById('qp-profiles-list');
+  const profiles  = ls('reflow_ordinal_profiles', null);
+
+  if (!profiles || profiles.length === 0) {
+    container.innerHTML = `<span style="font-size:13px;color:var(--text-light);font-style:italic;">No profiles found — save your Ordinal API key in Settings to load them.</span>`;
+    return;
+  }
+
+  const supported = profiles.filter(p => {
+    const ch = (p.channel || '').toLowerCase();
+    return ch.includes('linkedin') || ch.includes('twitter') || ch.includes('instagram') || ch.includes('x');
+  });
+
+  if (supported.length === 0) {
+    container.innerHTML = `<span style="font-size:13px;color:var(--text-light);font-style:italic;">No LinkedIn/Twitter/Instagram profiles connected in Ordinal.</span>`;
+    return;
+  }
+
+  container.innerHTML = supported.map(p => {
+    const icon = p.channel.toLowerCase().includes('linkedin') ? 'in'
+               : p.channel.toLowerCase().includes('twitter') || p.channel.toLowerCase().includes('x') ? '𝕏'
+               : '◎';
+    return `
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;border:1.5px solid var(--gray-200);border-radius:20px;font-size:13px;font-weight:500;user-select:none;" id="profile-label-${p.id}">
+        <input type="checkbox" id="qp-profile-${p.id}" value="${p.id}" data-channel="${p.channel}" checked style="accent-color:var(--coral);" onchange="toggleProfileLabel('${p.id}')">
+        ${icon} ${p.name || p.channel}
+      </label>`;
+  }).join('');
+
+  // Style checked ones
+  supported.forEach(p => toggleProfileLabel(p.id));
+}
+
+function toggleProfileLabel(id) {
+  const cb    = document.getElementById(`qp-profile-${id}`);
+  const label = document.getElementById(`profile-label-${id}`);
+  if (!cb || !label) return;
+  label.style.borderColor  = cb.checked ? 'var(--coral)' : 'var(--gray-200)';
+  label.style.background   = cb.checked ? 'var(--coral-light)' : 'white';
+  label.style.color        = cb.checked ? 'var(--coral)' : 'var(--text-dark)';
+}
+
+function setScheduleNow() {
+  document.getElementById('qp-schedule-time').value = '';
 }
 
 function closeQuickPostModal() {
@@ -1905,14 +1967,33 @@ async function confirmQuickPost() {
     return;
   }
 
+  // Collect selected profile checkboxes
+  const checkedBoxes = document.querySelectorAll('#qp-profiles-list input[type=checkbox]:checked');
+  const selectedProfiles = Array.from(checkedBoxes).map(cb => ({
+    id: cb.value,
+    channel: cb.dataset.channel
+  }));
+
+  if (selectedProfiles.length === 0) {
+    toast('Select at least one profile to post to.', 'error');
+    return;
+  }
+
+  // Get schedule time
+  const scheduleInput = document.getElementById('qp-schedule-time').value;
+  const publishAt = scheduleInput ? new Date(scheduleInput).toISOString() : (() => {
+    const n = new Date(); n.setMinutes(n.getMinutes() + 1); return n.toISOString();
+  })();
+
   const confirmBtn = document.getElementById('qp-confirm-btn');
   confirmBtn.disabled = true;
   confirmBtn.textContent = 'Sending…';
 
   try {
-    await postToOrdinal(text, settings.ordinalApiKey);
+    await postToOrdinal(text, settings.ordinalApiKey, selectedProfiles, publishAt);
     closeQuickPostModal();
-    toast('Sent to Ordinal! Check your Ordinal dashboard to review and publish.', 'success');
+    const when = scheduleInput ? `Scheduled for ${new Date(scheduleInput).toLocaleString()}` : 'Queued for immediate posting';
+    toast(`Sent to Ordinal! ${when}.`, 'success');
   } catch (err) {
     toast(`Ordinal error: ${err.message}`, 'error');
   } finally {
@@ -1931,38 +2012,25 @@ async function fetchOrdinalProfiles(apiKey) {
   return profiles;
 }
 
-async function postToOrdinal(text, apiKey) {
-  // Load saved profiles, fetch fresh if none stored
-  let profiles = ls('reflow_ordinal_profiles', null);
-  if (!profiles) profiles = await fetchOrdinalProfiles(apiKey);
-
-  const now = new Date();
-  now.setMinutes(now.getMinutes() + 2);
-  const publishAt = now.toISOString();
+async function postToOrdinal(text, apiKey, selectedProfiles, publishAt) {
+  const isScheduled = new Date(publishAt) > new Date(Date.now() + 30000);
 
   const body = {
     title: `ReFlow — ${new Date().toLocaleDateString()}`,
-    status: 'ToDo',
+    status: isScheduled ? 'Scheduled' : 'ToDo',
     publishAt
   };
 
-  // Match profile by channel name (case-insensitive, handles LinkedIn/linkedin/LINKEDIN etc.)
-  const findProfile = (name) => profiles.find(p =>
-    p.channel && p.channel.toLowerCase().includes(name.toLowerCase())
-  );
-
-  const liProfile = findProfile('linkedin');
-  if (liProfile) body.linkedIn = { profileId: liProfile.id, copy: text };
-
-  const xProfile = findProfile('twitter') || findProfile('x');
-  if (xProfile) body.x = { profileId: xProfile.id, tweets: [{ copy: text.substring(0, 280) }] };
-
-  const igProfile = findProfile('instagram');
-  if (igProfile) body.instagram = { profileId: igProfile.id, copy: text };
-
-  if (!body.linkedIn && !body.x && !body.instagram) {
-    const found = profiles.map(p => `${p.channel}(${p.name || 'unnamed'})`).join(', ') || 'none';
-    throw new Error(`No matching social profiles found. Profiles in Ordinal: ${found}. Make sure LinkedIn, Twitter/X, or Instagram is connected in your Ordinal dashboard.`);
+  // Build channel objects from selected profiles only
+  for (const p of selectedProfiles) {
+    const ch = (p.channel || '').toLowerCase();
+    if (ch.includes('linkedin')) {
+      body.linkedIn = { profileId: p.id, copy: text };
+    } else if (ch.includes('twitter') || ch === 'x') {
+      body.x = { profileId: p.id, tweets: [{ copy: text.substring(0, 280) }] };
+    } else if (ch.includes('instagram')) {
+      body.instagram = { profileId: p.id, copy: text };
+    }
   }
 
   const res = await fetch('https://app.tryordinal.com/api/v1/posts', {
