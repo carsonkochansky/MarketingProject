@@ -1,0 +1,2269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ReFlow — Content Repurposing Platform</title>
+  <style>
+    :root {
+      --navy: #0f1f3d;
+      --navy-mid: #1a3260;
+      --navy-light: #2a4a8a;
+      --coral: #ff6b4a;
+      --coral-hover: #e85a3a;
+      --coral-light: #fff1ee;
+      --white: #ffffff;
+      --gray-50: #f8f9fc;
+      --gray-100: #f0f2f7;
+      --gray-200: #e2e6ef;
+      --gray-300: #c8cfe0;
+      --gray-500: #7a89aa;
+      --gray-700: #3d4f72;
+      --text-dark: #0f1f3d;
+      --text-mid: #3d4f72;
+      --text-light: #7a89aa;
+      --shadow-sm: 0 1px 4px rgba(15,31,61,0.08);
+      --shadow-md: 0 4px 16px rgba(15,31,61,0.10);
+      --shadow-lg: 0 8px 32px rgba(15,31,61,0.13);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --sidebar-width: 220px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--gray-50);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ── SIDEBAR ─────────────────────────────── */
+    #sidebar {
+      width: var(--sidebar-width);
+      min-height: 100vh;
+      background: var(--navy);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      left: 0; top: 0;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-logo {
+      padding: 28px 24px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .sidebar-logo .app-name {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--white);
+      letter-spacing: -0.5px;
+    }
+
+    .sidebar-logo .app-name span { color: var(--coral); }
+
+    .sidebar-logo .tagline {
+      font-size: 11px;
+      color: var(--gray-500);
+      margin-top: 3px;
+      letter-spacing: 0.3px;
+    }
+
+    .sidebar-user {
+      padding: 16px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .sidebar-user .user-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--white);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sidebar-user .user-biz {
+      font-size: 11px;
+      color: var(--gray-500);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 12px 0;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 24px;
+      color: rgba(255,255,255,0.6);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.15s ease;
+      border-left: 3px solid transparent;
+    }
+
+    .nav-item:hover { background: rgba(255,255,255,0.05); color: var(--white); }
+
+    .nav-item.active {
+      background: rgba(255,107,74,0.12);
+      color: var(--white);
+      border-left-color: var(--coral);
+    }
+
+    .nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+    .sidebar-footer {
+      padding: 16px 24px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .powered-badge {
+      font-size: 10px;
+      color: rgba(255,255,255,0.3);
+      text-align: center;
+    }
+
+    .powered-badge span { color: var(--coral); opacity: 0.7; }
+
+    /* ── MAIN CONTENT ─────────────────────────── */
+    #main {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 32px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .topbar-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .api-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-light);
+      padding: 6px 12px;
+      background: var(--gray-100);
+      border-radius: 20px;
+    }
+
+    .api-status .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--gray-300);
+    }
+
+    .api-status.connected .dot { background: #22c55e; }
+    .api-status.connected { color: var(--text-mid); }
+
+    #page-content {
+      flex: 1;
+      padding: 32px;
+    }
+
+    /* ── PAGES ───────────────────────────────── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── CARDS ───────────────────────────────── */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--gray-200);
+    }
+
+    .card-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .card-header h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .card-header p {
+      font-size: 13px;
+      color: var(--text-light);
+      margin-top: 3px;
+    }
+
+    .card-body { padding: 24px; }
+
+    /* ── BUTTONS ─────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s ease;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--coral);
+      color: var(--white);
+    }
+
+    .btn-primary:hover { background: var(--coral-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,107,74,0.35); }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-secondary {
+      background: var(--gray-100);
+      color: var(--text-mid);
+      border: 1px solid var(--gray-200);
+    }
+
+    .btn-secondary:hover { background: var(--gray-200); }
+
+    .btn-navy {
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    .btn-navy:hover { background: var(--navy-mid); transform: translateY(-1px); }
+
+    .btn-sm {
+      padding: 7px 14px;
+      font-size: 12px;
+    }
+
+    .btn-danger {
+      background: #fee2e2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+    }
+
+    .btn-danger:hover { background: #fecaca; }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    /* ── FORMS ───────────────────────────────── */
+    .form-group { margin-bottom: 20px; }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-mid);
+      margin-bottom: 7px;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      color: var(--text-dark);
+      background: var(--white);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--coral);
+      box-shadow: 0 0 0 3px rgba(255,107,74,0.12);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .form-hint {
+      font-size: 11px;
+      color: var(--text-light);
+      margin-top: 5px;
+    }
+
+    /* ── TOGGLE ──────────────────────────────── */
+    .toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .toggle {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .toggle input { opacity: 0; width: 0; height: 0; }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background: var(--gray-300);
+      border-radius: 24px;
+      transition: 0.2s;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px; width: 18px;
+      left: 3px; bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.2s;
+    }
+
+    .toggle input:checked + .toggle-slider { background: var(--coral); }
+    .toggle input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+    /* ── DASHBOARD ───────────────────────────── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--gray-200);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--text-dark);
+      line-height: 1;
+    }
+
+    .stat-value span { font-size: 16px; font-weight: 500; color: var(--text-light); }
+
+    .stat-sub {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-top: 6px;
+    }
+
+    .quick-start-card {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+      border-radius: var(--radius);
+      padding: 32px;
+      color: white;
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .quick-start-card::after {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 200px; height: 200px;
+      background: rgba(255,107,74,0.1);
+      border-radius: 50%;
+    }
+
+    .quick-start-card h2 {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .quick-start-card p {
+      font-size: 14px;
+      opacity: 0.7;
+      margin-bottom: 20px;
+      max-width: 400px;
+    }
+
+    .recent-section h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 14px;
+    }
+
+    /* ── REPURPOSE PAGE ──────────────────────── */
+    .repurpose-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .controls-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .output-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .word-count {
+      font-size: 12px;
+      color: var(--text-light);
+      background: var(--gray-100);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .output-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .output-box {
+      min-height: 200px;
+      padding: 18px;
+      background: var(--gray-50);
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text-dark);
+      white-space: pre-wrap;
+      font-family: inherit;
+    }
+
+    .output-box.placeholder {
+      color: var(--text-light);
+      font-style: italic;
+    }
+
+    .loading-spinner {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 40px;
+      color: var(--text-light);
+      font-size: 14px;
+    }
+
+    .loading-spinner.active { display: flex; }
+
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2px solid var(--gray-200);
+      border-top-color: var(--coral);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .repurpose-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    /* ── CLIENTS ─────────────────────────────── */
+    .client-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .client-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--gray-200);
+      position: relative;
+    }
+
+    .client-card .client-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .client-card .client-company {
+      font-size: 13px;
+      color: var(--text-light);
+      margin-top: 2px;
+    }
+
+    .client-card .client-industry {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--coral-light);
+      color: var(--coral);
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-top: 10px;
+    }
+
+    .client-card .client-voice {
+      font-size: 12px;
+      color: var(--text-mid);
+      margin-top: 12px;
+      line-height: 1.5;
+      border-top: 1px solid var(--gray-100);
+      padding-top: 10px;
+    }
+
+    .client-card .card-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .social-handles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .social-handle-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 20px;
+    }
+
+    .social-handle-badge.linkedin { background: #dbeafe; color: #1d4ed8; }
+    .social-handle-badge.twitter  { background: #f3f4f6; color: #111827; }
+    .social-handle-badge.instagram { background: #fce7f3; color: #9d174d; }
+    .social-handle-badge.missing  { background: #fef3c7; color: #92400e; font-style: italic; }
+
+    /* ── QUICK POST ───────────────────────────── */
+    #quick-post-section {
+      display: none;
+      margin-top: 16px;
+      padding: 16px;
+      background: var(--gray-50);
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+    }
+
+    #quick-post-section.visible { display: block; }
+
+    .quick-post-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    .quick-post-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-linkedin {
+      background: #0a66c2;
+      color: white;
+    }
+
+    .btn-linkedin:hover { background: #084e96; transform: translateY(-1px); }
+
+    .btn-twitter {
+      background: #000000;
+      color: white;
+    }
+
+    .btn-twitter:hover { background: #333; transform: translateY(-1px); }
+
+    .btn-instagram {
+      background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+      color: white;
+    }
+
+    .btn-instagram:hover { opacity: 0.88; transform: translateY(-1px); }
+
+    /* ── SOCIAL SETUP BANNER ─────────────────── */
+    #social-setup-banner {
+      display: none;
+      background: linear-gradient(135deg, #1e3a5f, #0f1f3d);
+      color: white;
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    #social-setup-banner.visible { display: flex; }
+    #social-setup-banner strong { color: var(--coral); }
+    #social-setup-banner .banner-close {
+      background: none; border: none; color: rgba(255,255,255,0.5);
+      cursor: pointer; font-size: 18px; padding: 0 4px;
+    }
+
+    .no-clients {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-light);
+    }
+
+    .no-clients .empty-icon { font-size: 40px; margin-bottom: 12px; }
+    .no-clients p { font-size: 14px; }
+
+    /* ── HISTORY ─────────────────────────────── */
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .history-table th {
+      text-align: left;
+      padding: 12px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: var(--gray-50);
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .history-table td {
+      padding: 14px 16px;
+      font-size: 13px;
+      color: var(--text-mid);
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .history-table tr:last-child td { border-bottom: none; }
+
+    .history-table tr:hover td {
+      background: var(--gray-50);
+      cursor: pointer;
+    }
+
+    .history-table .preview-text {
+      color: var(--text-dark);
+      font-weight: 500;
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .format-badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--navy);
+      color: white;
+    }
+
+    .no-history {
+      text-align: center;
+      padding: 60px;
+      color: var(--text-light);
+      font-size: 14px;
+    }
+
+    /* ── SETTINGS ────────────────────────────── */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .api-key-wrap {
+      position: relative;
+    }
+
+    .api-key-wrap .form-input {
+      padding-right: 44px;
+    }
+
+    .toggle-pw {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-light);
+      font-size: 16px;
+      padding: 2px;
+    }
+
+    .settings-save-row {
+      margin-top: 8px;
+    }
+
+    /* ── MODAL ───────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15,31,61,0.5);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 32px;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: var(--shadow-lg);
+      animation: modalIn 0.2s ease;
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(-16px) scale(0.97); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .modal h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--text-dark);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 24px;
+    }
+
+    /* ── TOAST ───────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--navy);
+      color: white;
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all 0.2s ease;
+      pointer-events: none;
+    }
+
+    #toast.show { opacity: 1; transform: translateY(0); }
+    #toast.success { background: #166534; }
+    #toast.error { background: #991b1b; }
+
+    /* ── MOBILE MENU TOGGLE ──────────────────── */
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 20px;
+      color: var(--text-dark);
+      padding: 4px;
+    }
+
+    /* ── RESPONSIVE ──────────────────────────── */
+    @media (max-width: 900px) {
+      #sidebar {
+        transform: translateX(-100%);
+      }
+
+      #sidebar.open {
+        transform: translateX(0);
+      }
+
+      #main {
+        margin-left: 0;
+      }
+
+      .menu-toggle { display: flex; }
+
+      .repurpose-grid,
+      .settings-grid,
+      .controls-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      #page-content { padding: 16px; }
+      .topbar { padding: 0 16px; }
+      .stat-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* ── MISC ────────────────────────────────── */
+    hr { border: none; border-top: 1px solid var(--gray-100); margin: 24px 0; }
+
+    .page-header {
+      margin-bottom: 24px;
+    }
+
+    .page-header h1 {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+
+    .page-header p {
+      font-size: 14px;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+
+    .section-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 16px;
+    }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
+    .alert-warning {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #92400e;
+    }
+
+    .alert-info {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e40af;
+    }
+
+    .overlay-mobile {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 99;
+    }
+
+    .overlay-mobile.open { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- Mobile overlay -->
+<div class="overlay-mobile" id="mobileOverlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sidebar-logo">
+    <div class="app-name">Re<span>Flow</span></div>
+    <div class="tagline">Content Repurposing Platform</div>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-name" id="sb-user-name">Your Name</div>
+    <div class="user-biz" id="sb-biz-name">Your Business</div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')">
+      <span class="nav-icon">⊞</span> Dashboard
+    </div>
+    <div class="nav-item" data-page="repurpose" onclick="navigate('repurpose')">
+      <span class="nav-icon">✦</span> Repurpose
+    </div>
+    <div class="nav-item" data-page="clients" onclick="navigate('clients')">
+      <span class="nav-icon">◈</span> Clients
+    </div>
+    <div class="nav-item" data-page="history" onclick="navigate('history')">
+      <span class="nav-icon">◷</span> History
+    </div>
+    <div class="nav-item" data-page="settings" onclick="navigate('settings')">
+      <span class="nav-icon">⚙</span> Settings
+    </div>
+  </div>
+  <div class="sidebar-footer">
+    <div class="powered-badge">Created by <span>Carson Kochansky</span> &amp; Lucas Gonzalex</div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div id="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <span class="topbar-title" id="topbar-title">Dashboard</span>
+    </div>
+    <div class="topbar-right">
+      <div class="api-status" id="api-status-badge">
+        <div class="dot"></div>
+        <span id="api-status-text">No API Key</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="page-content">
+
+    <!-- ─── DASHBOARD ────────────────────────── -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <h1>Welcome back 👋</h1>
+        <p>Here's your content repurposing overview.</p>
+      </div>
+
+      <div class="quick-start-card">
+        <h2>Ready to repurpose content?</h2>
+        <p>Paste in any raw content and turn it into polished, platform-ready pieces in seconds.</p>
+        <button class="btn btn-primary" onclick="navigate('repurpose')">✦ Start Repurposing</button>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Pieces</div>
+          <div class="stat-value" id="stat-total">0</div>
+          <div class="stat-sub">repurposed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active Clients</div>
+          <div class="stat-value" id="stat-clients">0</div>
+          <div class="stat-sub">profiles saved</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">This Week</div>
+          <div class="stat-value" id="stat-week">0</div>
+          <div class="stat-sub">pieces created</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Top Format</div>
+          <div class="stat-value" style="font-size:18px;margin-top:4px;" id="stat-format">—</div>
+          <div class="stat-sub">most used</div>
+        </div>
+      </div>
+
+      <div class="recent-section">
+        <h3>Recent Activity</h3>
+        <div class="card">
+          <div id="dash-recent" style="padding:0;">
+            <div class="no-history" style="padding:40px;">No content repurposed yet. Hit the button above to get started!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── REPURPOSE ────────────────────────── -->
+    <div class="page" id="page-repurpose">
+      <div class="page-header">
+        <h1>Repurpose Content</h1>
+        <p>Paste raw content, choose your format and tone, and let Claude do the work.</p>
+      </div>
+
+      <div id="no-key-warning" class="alert alert-warning" style="display:none;">
+        ⚠️ No API key set. Go to <a href="#" onclick="navigate('settings')" style="color:inherit;font-weight:700;">Settings</a> to add your Claude API key.
+      </div>
+
+      <div id="social-setup-banner">
+        <span>🔗 Some clients are missing linked social handles. <strong>Link them now</strong> to enable Quick Post buttons after generating.</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn btn-primary btn-sm" onclick="navigate('clients')">Go to Clients</button>
+          <button class="banner-close" onclick="document.getElementById('social-setup-banner').classList.remove('visible')">✕</button>
+        </div>
+      </div>
+
+      <div class="repurpose-grid">
+        <!-- Input -->
+        <div>
+          <div class="card" style="margin-bottom:20px;">
+            <div class="card-header">
+              <h2>Input Content</h2>
+              <p>Paste your raw content below</p>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label">Client (Optional)</label>
+                <select class="form-select" id="r-client-select">
+                  <option value="">— No Client Selected —</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label">Raw Content</label>
+                <textarea class="form-textarea" id="r-input" rows="12"
+                  placeholder="Paste your podcast transcript, article, LinkedIn post, or any raw content here…"></textarea>
+                <div class="form-hint" id="input-count">0 words · 0 characters</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2>Output Settings</h2>
+            </div>
+            <div class="card-body">
+              <div class="controls-row">
+                <div class="form-group" style="margin-bottom:0;">
+                  <label class="form-label">Output Format</label>
+                  <select class="form-select" id="r-format">
+                    <option value="linkedin">LinkedIn Post</option>
+                    <option value="email">Email Newsletter</option>
+                    <option value="twitter">Twitter/X Thread</option>
+                    <option value="instagram">Instagram Caption</option>
+                    <option value="blog">Blog Post Summary</option>
+                  </select>
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label class="form-label">Tone</label>
+                  <select class="form-select" id="r-tone">
+                    <option value="professional">Professional</option>
+                    <option value="conversational">Conversational</option>
+                    <option value="thought-leadership">Thought Leadership</option>
+                    <option value="casual">Casual</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="repurpose-actions">
+                <button class="btn btn-primary" id="btn-repurpose" onclick="repurposeContent()">
+                  ✦ Repurpose Content
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Output -->
+        <div>
+          <div class="card" style="height:100%;">
+            <div class="card-header">
+              <h2>Repurposed Output</h2>
+              <p>Your polished content appears here</p>
+            </div>
+            <div class="card-body">
+              <div class="output-meta">
+                <div class="word-count" id="output-count">— words · — chars</div>
+                <div class="output-actions">
+                  <button class="btn btn-secondary btn-sm" onclick="copyOutput()" id="btn-copy" disabled>⎘ Copy</button>
+                  <button class="btn btn-secondary btn-sm" onclick="regenerate()" id="btn-regen" disabled>↺ Regenerate</button>
+                  <button class="btn btn-secondary btn-sm" onclick="downloadOutput()" id="btn-download" disabled>↓ Download</button>
+                </div>
+              </div>
+
+              <div class="loading-spinner" id="loading-spinner">
+                <div class="spinner"></div>
+                <span>Response is being generated…</span>
+              </div>
+
+              <div class="output-box placeholder" id="output-box">
+                Your repurposed content will appear here. Paste some content on the left and hit "Repurpose Content" to get started.
+              </div>
+
+              <div id="quick-post-section">
+                <div class="quick-post-label">⚡ Quick Post</div>
+                <div class="quick-post-buttons" id="quick-post-buttons"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── CLIENTS ──────────────────────────── -->
+    <div class="page" id="page-clients">
+      <div class="page-header">
+        <h1>Client Profiles</h1>
+        <p>Save client brand voices so outputs match their style automatically.</p>
+      </div>
+
+      <div class="section-actions">
+        <button class="btn btn-primary" onclick="openClientModal()">+ Add Client</button>
+      </div>
+
+      <div class="client-grid" id="client-grid">
+        <div class="no-clients">
+          <div class="empty-icon">◈</div>
+          <p>No clients yet. Add your first client profile.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── HISTORY ──────────────────────────── -->
+    <div class="page" id="page-history">
+      <div class="page-header">
+        <h1>History</h1>
+        <p>Your last 20 repurposed pieces. Click any row to reload.</p>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+        <button class="btn btn-danger btn-sm" onclick="clearHistory()">Clear History</button>
+      </div>
+
+      <div class="card">
+        <div style="overflow-x:auto;">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Client</th>
+                <th>Format</th>
+                <th>Preview</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="history-tbody">
+              <tr>
+                <td colspan="5" class="no-history">No history yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SETTINGS ─────────────────────────── -->
+    <div class="page" id="page-settings">
+      <div class="page-header">
+        <h1>Settings</h1>
+        <p>Configure your API key, preferences, and account details.</p>
+      </div>
+
+      <div class="settings-grid">
+        <!-- API & Account -->
+        <div>
+          <div class="card" style="margin-bottom:24px;">
+            <div class="card-header">
+              <h2>API Configuration</h2>
+              <p>Connect your Claude API key</p>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label">Claude API Key</label>
+                <div class="api-key-wrap">
+                  <input type="password" class="form-input" id="s-api-key" placeholder="sk-ant-..." />
+                  <button class="toggle-pw" onclick="toggleApiKeyVis()" title="Show/hide key">👁</button>
+                </div>
+                <div class="form-hint">Stored securely in your browser's localStorage. Never sent anywhere except the Anthropic API.</div>
+              </div>
+              <div class="settings-save-row">
+                <button class="btn btn-primary" onclick="saveSettings()">Save API Key</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2>Profile</h2>
+              <p>Shown in the app header</p>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label">Your Name</label>
+                <input type="text" class="form-input" id="s-user-name" placeholder="e.g. Alex Johnson" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Business Name</label>
+                <input type="text" class="form-input" id="s-biz-name" placeholder="e.g. ReFlow Agency" />
+              </div>
+              <button class="btn btn-primary" onclick="saveSettings()">Save Profile</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preferences -->
+        <div>
+          <div class="card" style="margin-bottom:24px;">
+            <div class="card-header">
+              <h2>Default Preferences</h2>
+              <p>Pre-select your most-used options</p>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label">Default Output Format</label>
+                <select class="form-select" id="s-default-format">
+                  <option value="linkedin">LinkedIn Post</option>
+                  <option value="email">Email Newsletter</option>
+                  <option value="twitter">Twitter/X Thread</option>
+                  <option value="instagram">Instagram Caption</option>
+                  <option value="blog">Blog Post Summary</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Default Tone</label>
+                <select class="form-select" id="s-default-tone">
+                  <option value="professional">Professional</option>
+                  <option value="conversational">Conversational</option>
+                  <option value="thought-leadership">Thought Leadership</option>
+                  <option value="casual">Casual</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" onclick="saveSettings()">Save Preferences</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2>Student Mode</h2>
+              <p>Softens outputs to feel more human</p>
+            </div>
+            <div class="card-body">
+              <div class="toggle-wrap">
+                <label class="toggle">
+                  <input type="checkbox" id="s-student-mode" />
+                  <span class="toggle-slider"></span>
+                </label>
+                <div>
+                  <div style="font-size:14px;font-weight:600;color:var(--text-dark);">Enable Student Mode</div>
+                  <div style="font-size:12px;color:var(--text-light);margin-top:2px;">Adds a note to the system prompt that the operator is a Dartmouth student learning the space — outputs will feel less corporate.</div>
+                </div>
+              </div>
+              <div style="margin-top:16px;">
+                <button class="btn btn-primary" onclick="saveSettings()">Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LinkedIn Integration — full width below grid -->
+      <div class="card" style="margin-top:24px;">
+        <div class="card-header">
+          <h2>LinkedIn Integration</h2>
+          <p>Connect your account for one-click posting — no pasting required</p>
+        </div>
+        <div class="card-body">
+          <div id="li-connected-banner" style="display:none;align-items:center;gap:12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px 16px;margin-bottom:18px;">
+            <span style="font-size:14px;color:#1e40af;">✓ Connected as <strong id="li-connected-name"></strong></span>
+            <button class="btn btn-danger btn-sm" onclick="disconnectLinkedIn()">Disconnect</button>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" class="controls-row">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">LinkedIn App Client ID</label>
+              <input type="text" class="form-input" id="s-li-client-id" placeholder="86xxxxxxxxxxxxxxxx" />
+              <div class="form-hint">From LinkedIn Developer Portal → Your App → Auth tab</div>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Actions</label>
+              <div style="display:flex;gap:10px;margin-top:2px;">
+                <button class="btn btn-primary" onclick="saveSettings()">Save Client ID</button>
+                <button class="btn btn-linkedin" onclick="connectLinkedIn()">in Connect LinkedIn</button>
+              </div>
+            </div>
+          </div>
+          <div class="alert alert-warning" style="margin-top:16px;font-size:12px;line-height:1.6;">
+            <strong>One-time setup (5 min):</strong><br>
+            1. Go to <strong>linkedin.com/developers</strong> → Create App<br>
+            2. Under Auth, add your Netlify URL as an authorized redirect URI<br>
+            3. Copy the Client ID here and paste the Client Secret as <code>LINKEDIN_CLIENT_SECRET</code> in your Netlify dashboard → Environment Variables<br>
+            4. Hit "Connect LinkedIn" — after that, posting is one click forever.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+</div><!-- /main -->
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- QUICK POST CONFIRMATION MODAL -->
+<div class="modal-overlay" id="quickPostModal">
+  <div class="modal" style="max-width:580px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <h3 style="margin-bottom:0;" id="qp-modal-title">Post to Twitter/X</h3>
+      <button class="banner-close" onclick="closeQuickPostModal()" style="color:var(--text-light);font-size:20px;">✕</button>
+    </div>
+    <p style="font-size:13px;color:var(--text-light);margin-bottom:16px;" id="qp-modal-sub">Review your content before posting.</p>
+
+    <div style="background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);padding:16px;max-height:280px;overflow-y:auto;font-size:14px;line-height:1.7;white-space:pre-wrap;color:var(--text-dark);" id="qp-preview"></div>
+
+    <div id="qp-char-note" style="font-size:12px;color:var(--text-light);margin-top:8px;"></div>
+
+    <div id="qp-instagram-note" style="display:none;" class="alert alert-info" style="margin-top:12px;font-size:12px;">
+      Instagram doesn't support web compose links. Your caption has been copied — tap "Open Instagram" and paste it into your post.
+    </div>
+
+    <div class="modal-actions" style="margin-top:20px;">
+      <button class="btn btn-secondary" onclick="closeQuickPostModal()">Cancel</button>
+      <button class="btn" id="qp-confirm-btn" onclick="confirmQuickPost()">Post Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- CLIENT MODAL -->
+<div class="modal-overlay" id="clientModal">
+  <div class="modal">
+    <h3 id="client-modal-title">Add Client Profile</h3>
+    <div class="form-group">
+      <label class="form-label">Client Name *</label>
+      <input type="text" class="form-input" id="c-name" placeholder="e.g. Sarah Chen" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Company Name</label>
+      <input type="text" class="form-input" id="c-company" placeholder="e.g. Acme Corp" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Industry</label>
+      <input type="text" class="form-input" id="c-industry" placeholder="e.g. SaaS, Finance, Healthcare" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Brand Voice Notes</label>
+      <textarea class="form-textarea" id="c-voice" rows="3"
+        placeholder="Describe their voice: e.g. 'Warm but authoritative. Avoids jargon. Uses storytelling. Audience is mid-career professionals.'"></textarea>
+      <div class="form-hint">This is appended to the AI system prompt when this client is selected.</div>
+    </div>
+
+    <div style="font-size:12px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">Social Handles (for Quick Post)</div>
+    <div class="form-group">
+      <label class="form-label">LinkedIn Profile URL</label>
+      <input type="text" class="form-input" id="c-linkedin" placeholder="https://linkedin.com/in/username" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Twitter / X Handle</label>
+      <input type="text" class="form-input" id="c-twitter" placeholder="@handle (without @)" />
+    </div>
+    <div class="form-group" style="margin-bottom:0;">
+      <label class="form-label">Instagram Handle</label>
+      <input type="text" class="form-input" id="c-instagram" placeholder="username (without @)" />
+      <div class="form-hint">These are saved per client so Quick Post opens the right platform after generating content.</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeClientModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveClient()">Save Client</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────
+let state = {
+  currentPage: 'dashboard',
+  editingClientId: null,
+  lastInput: '',
+  lastFormat: '',
+  lastTone: '',
+  lastClientId: ''
+};
+
+// ─── STORAGE HELPERS ─────────────────────────────────────
+function ls(key, def = null) {
+  try {
+    const v = localStorage.getItem(key);
+    return v !== null ? JSON.parse(v) : def;
+  } catch { return def; }
+}
+
+function lsSet(key, val) {
+  localStorage.setItem(key, JSON.stringify(val));
+}
+
+function getSettings() {
+  return ls('reflow_settings', {
+    apiKey: '',
+    userName: '',
+    bizName: '',
+    defaultFormat: 'linkedin',
+    defaultTone: 'professional',
+    studentMode: false,
+    liClientId: ''
+  });
+}
+
+function getClients() { return ls('reflow_clients', []); }
+function getHistory() { return ls('reflow_history', []); }
+
+// ─── NAVIGATION ──────────────────────────────────────────
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(`page-${page}`).classList.add('active');
+  document.querySelector(`[data-page="${page}"]`).classList.add('active');
+
+  const titles = {
+    dashboard: 'Dashboard',
+    repurpose: 'Repurpose Content',
+    clients: 'Client Profiles',
+    history: 'History',
+    settings: 'Settings'
+  };
+  document.getElementById('topbar-title').textContent = titles[page];
+  state.currentPage = page;
+
+  if (page === 'dashboard') renderDashboard();
+  if (page === 'repurpose') initRepurposePage();
+  if (page === 'clients') renderClients();
+  if (page === 'history') renderHistory();
+  if (page === 'settings') loadSettingsForm();
+
+  closeSidebar();
+}
+
+// ─── SIDEBAR MOBILE ───────────────────────────────────────
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('mobileOverlay');
+  sb.classList.toggle('open');
+  ov.classList.toggle('open');
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('mobileOverlay').classList.remove('open');
+}
+
+// ─── TOAST ────────────────────────────────────────────────
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + type;
+  setTimeout(() => { el.className = ''; }, 2800);
+}
+
+// ─── API STATUS ───────────────────────────────────────────
+function updateApiStatus() {
+  const settings = getSettings();
+  const badge = document.getElementById('api-status-badge');
+  const text = document.getElementById('api-status-text');
+  if (settings.apiKey && settings.apiKey.startsWith('sk-ant-')) {
+    badge.classList.add('connected');
+    text.textContent = 'API Connected';
+  } else {
+    badge.classList.remove('connected');
+    text.textContent = 'No API Key';
+  }
+}
+
+// ─── SIDEBAR USER ─────────────────────────────────────────
+function updateSidebarUser() {
+  const s = getSettings();
+  document.getElementById('sb-user-name').textContent = s.userName || 'Your Name';
+  document.getElementById('sb-biz-name').textContent = s.bizName || 'Your Business';
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────
+function renderDashboard() {
+  const history = getHistory();
+  const clients = getClients();
+  const now = new Date();
+  const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+
+  document.getElementById('stat-total').textContent = history.length;
+  document.getElementById('stat-clients').textContent = clients.length;
+  document.getElementById('stat-week').textContent = history.filter(h => new Date(h.date) > weekAgo).length;
+
+  // Top format
+  if (history.length > 0) {
+    const counts = {};
+    history.forEach(h => { counts[h.format] = (counts[h.format] || 0) + 1; });
+    const top = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
+    document.getElementById('stat-format').textContent = formatLabel(top[0]);
+  }
+
+  // Recent list
+  const container = document.getElementById('dash-recent');
+  if (history.length === 0) {
+    container.innerHTML = '<div class="no-history" style="padding:40px;">No content repurposed yet. Hit the button above to get started!</div>';
+    return;
+  }
+
+  const recent = history.slice(0, 5);
+  container.innerHTML = `
+    <table class="history-table">
+      <thead><tr><th>Date</th><th>Client</th><th>Format</th><th>Preview</th></tr></thead>
+      <tbody>
+        ${recent.map(h => `
+          <tr onclick="loadHistoryItem('${h.id}')">
+            <td>${formatDate(h.date)}</td>
+            <td>${h.clientName || '—'}</td>
+            <td><span class="format-badge">${formatLabel(h.format)}</span></td>
+            <td class="preview-text">${escHtml(h.preview)}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>`;
+}
+
+// ─── REPURPOSE PAGE ───────────────────────────────────────
+function initRepurposePage() {
+  const settings = getSettings();
+  const clients = getClients();
+
+  // Warning
+  const warn = document.getElementById('no-key-warning');
+  warn.style.display = settings.apiKey ? 'none' : 'block';
+
+  // Social setup banner — show if any client is missing all socials
+  const banner = document.getElementById('social-setup-banner');
+  const missingAny = clients.length > 0 && clients.some(c => !c.linkedin && !c.twitter && !c.instagram);
+  if (missingAny) banner.classList.add('visible');
+  else banner.classList.remove('visible');
+
+  // Hide quick post until content generated
+  document.getElementById('quick-post-section').classList.remove('visible');
+
+  // Default dropdowns
+  document.getElementById('r-format').value = settings.defaultFormat || 'linkedin';
+  document.getElementById('r-tone').value = settings.defaultTone || 'professional';
+
+  // Client dropdown
+  const sel = document.getElementById('r-client-select');
+  sel.innerHTML = '<option value="">— No Client Selected —</option>';
+  clients.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = c.name + (c.company ? ` (${c.company})` : '');
+    sel.appendChild(opt);
+  });
+
+  // Input counter
+  const input = document.getElementById('r-input');
+  input.addEventListener('input', () => updateInputCount(input.value));
+}
+
+function updateInputCount(val) {
+  const words = val.trim() ? val.trim().split(/\s+/).length : 0;
+  document.getElementById('input-count').textContent = `${words.toLocaleString()} words · ${val.length.toLocaleString()} characters`;
+}
+
+function buildSystemPrompt(format, tone, clientVoice, studentMode) {
+  const formatInstructions = {
+    linkedin: 'For LinkedIn posts: use short punchy paragraphs, a strong opening hook (don\'t start with "I"), and end with a question or call to action. No more than 1300 characters ideally. Use line breaks generously.',
+    email: 'For email newsletters: start with a compelling subject line suggestion prefixed with "Subject:", then write warm clear sections with headers, and use a conversational tone throughout. End with a clear CTA.',
+    twitter: 'For Twitter/X threads: number each tweet starting with 1/. Keep each tweet under 280 characters. Make the first tweet a strong standalone hook. End the thread with a summary or CTA tweet.',
+    instagram: 'For Instagram captions: lead with a bold first line that stops the scroll, tell a micro-story in the middle, and end with 5-8 relevant hashtags on a new line.',
+    blog: 'For blog post summaries: write a compelling 150-200 word summary with a clear value proposition, 2-3 key takeaways as bullet points, and a hook sentence at the top.'
+  };
+
+  const toneMap = {
+    professional: 'professional, polished, and credible',
+    conversational: 'warm, conversational, and relatable — like talking to a smart friend',
+    'thought-leadership': 'bold, insightful, and forward-thinking — position the author as an expert with a unique POV',
+    casual: 'casual, fun, and energetic — friendly and approachable without being sloppy'
+  };
+
+  let prompt = `You are an expert content strategist and copywriter. Your job is to repurpose raw content into polished, platform-optimized pieces that sound human, engaging, and authentic. Never sound robotic or generic.
+
+The tone should be: ${toneMap[tone] || 'professional'}.
+
+${formatInstructions[format] || ''}
+
+Output ONLY the repurposed content — no preamble, no explanation, no "Here is your LinkedIn post:" intro. Just the content itself, ready to publish.`;
+
+  if (clientVoice) {
+    prompt += `\n\nCLIENT BRAND VOICE NOTES (match this voice closely):\n${clientVoice}`;
+  }
+
+  if (studentMode) {
+    prompt += '\n\n[Note: The operator is a Dartmouth student learning the content repurposing space. Keep outputs feeling human, genuine, and not overly corporate or polished to the point of sounding fake.]';
+  }
+
+  return prompt;
+}
+
+async function repurposeContent() {
+  const settings = getSettings();
+  if (!settings.apiKey) {
+    toast('Please add your API key in Settings first.', 'error');
+    navigate('settings');
+    return;
+  }
+
+  const input = document.getElementById('r-input').value.trim();
+  if (!input) {
+    toast('Please paste some content first.', 'error');
+    return;
+  }
+
+  const format = document.getElementById('r-format').value;
+  const tone = document.getElementById('r-tone').value;
+  const clientId = document.getElementById('r-client-select').value;
+  const clients = getClients();
+  const client = clients.find(c => c.id === clientId);
+
+  // Save for regenerate
+  state.lastInput = input;
+  state.lastFormat = format;
+  state.lastTone = tone;
+  state.lastClientId = clientId;
+
+  await callClaude(settings, input, format, tone, client);
+}
+
+async function regenerate() {
+  const settings = getSettings();
+  const clients = getClients();
+  const client = clients.find(c => c.id === state.lastClientId);
+  if (!state.lastInput) { toast('Nothing to regenerate.', 'error'); return; }
+  await callClaude(settings, state.lastInput, state.lastFormat, state.lastTone, client);
+}
+
+async function callClaude(settings, input, format, tone, client) {
+  const btn = document.getElementById('btn-repurpose');
+  const spinner = document.getElementById('loading-spinner');
+  const outputBox = document.getElementById('output-box');
+
+  btn.disabled = true;
+  spinner.classList.add('active');
+  outputBox.style.display = 'none';
+  document.getElementById('btn-copy').disabled = true;
+  document.getElementById('btn-regen').disabled = true;
+  document.getElementById('btn-download').disabled = true;
+
+  try {
+    const systemPrompt = buildSystemPrompt(format, tone, client?.voice || '', settings.studentMode);
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': settings.apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: `Repurpose this content:\n\n${input}` }]
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      const msg = err?.error?.message || `API error ${response.status}`;
+      throw new Error(msg);
+    }
+
+    const data = await response.json();
+    const text = data.content?.[0]?.text || '';
+
+    // Show output
+    outputBox.classList.remove('placeholder');
+    outputBox.textContent = text;
+    outputBox.style.display = 'block';
+
+    // Counts
+    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+    document.getElementById('output-count').textContent = `${words.toLocaleString()} words · ${text.length.toLocaleString()} chars`;
+
+    document.getElementById('btn-copy').disabled = false;
+    document.getElementById('btn-regen').disabled = false;
+    document.getElementById('btn-download').disabled = false;
+
+    // Save to history
+    saveToHistory(input, format, tone, text, client);
+
+    // Quick post buttons
+    renderQuickPostButtons(text, client, format);
+
+    toast('Content repurposed successfully!', 'success');
+  } catch (err) {
+    outputBox.style.display = 'block';
+    outputBox.classList.add('placeholder');
+    outputBox.textContent = `Error: ${err.message}`;
+    toast(`Error: ${err.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+    spinner.classList.remove('active');
+  }
+}
+
+function copyOutput() {
+  const text = document.getElementById('output-box').textContent;
+  navigator.clipboard.writeText(text).then(() => toast('Copied to clipboard!', 'success'));
+}
+
+// Holds pending post platform while modal is open
+let pendingPost = { platform: '' };
+
+function renderQuickPostButtons(text, client, format) {
+  const section = document.getElementById('quick-post-section');
+  const container = document.getElementById('quick-post-buttons');
+
+  // Store in state so onclick handlers don't need to pass text inline
+  state.quickPostText   = text;
+  state.quickPostTweet  = format === 'twitter' ? text.split('\n')[0] : text.substring(0, 270);
+  state.quickPostClient = client || null;
+
+  const linkedinLabel = client?.linkedin ? 'Post to LinkedIn' : 'Post to LinkedIn';
+  const twitterLabel  = client?.twitter  ? `Post as @${client.twitter}` : 'Post to Twitter/X';
+  const igLabel       = client?.instagram? `Post as @${client.instagram}` : 'Post to Instagram';
+
+  container.innerHTML = `
+    <button class="btn btn-linkedin btn-sm" onclick="openQuickPostModal('linkedin')">in ${linkedinLabel}</button>
+    <button class="btn btn-twitter btn-sm"  onclick="openQuickPostModal('twitter')">𝕏 ${twitterLabel}</button>
+    <button class="btn btn-instagram btn-sm" onclick="openQuickPostModal('instagram')">◎ ${igLabel}</button>`;
+
+  section.classList.add('visible');
+}
+
+function openQuickPostModal(platform) {
+  pendingPost.platform = platform;
+
+  const client     = state.quickPostClient;
+  const text       = platform === 'twitter' ? state.quickPostTweet : state.quickPostText;
+  const handle     = platform === 'twitter' ? (client?.twitter || '')
+                   : platform === 'linkedin' ? (client?.linkedin || '')
+                   : (client?.instagram || '');
+
+  const modal      = document.getElementById('quickPostModal');
+  const titleEl    = document.getElementById('qp-modal-title');
+  const subEl      = document.getElementById('qp-modal-sub');
+  const preview    = document.getElementById('qp-preview');
+  const noteEl     = document.getElementById('qp-char-note');
+  const igNote     = document.getElementById('qp-instagram-note');
+  const confirmBtn = document.getElementById('qp-confirm-btn');
+
+  igNote.style.display = 'none';
+
+  if (platform === 'twitter') {
+    titleEl.textContent    = handle ? `Post to Twitter/X as @${handle}` : 'Post to Twitter/X';
+    subEl.textContent      = 'First tweet shown below. Hit "Post Now" to open the compose window with text pre-filled.';
+    confirmBtn.textContent = '𝕏 Post Now';
+    confirmBtn.className   = 'btn btn-twitter';
+    noteEl.textContent     = `${text.length} / 280 characters`;
+    noteEl.style.color     = text.length > 280 ? '#dc2626' : 'var(--text-light)';
+  } else if (platform === 'linkedin') {
+    const liConnected = !!ls('reflow_linkedin', {}).accessToken;
+    const liName = ls('reflow_linkedin', {}).name || '';
+    titleEl.textContent    = liConnected ? `Post to LinkedIn as ${liName}` : 'Post to LinkedIn';
+    subEl.textContent      = liConnected
+      ? 'Review your post and hit "Post Now" — it posts directly to LinkedIn.'
+      : 'LinkedIn not connected yet. Hit "Post Now" to open the composer, or go to Settings → LinkedIn Integration to connect for one-click posting.';
+    confirmBtn.textContent = 'in Post Now';
+    confirmBtn.className   = 'btn btn-linkedin';
+    noteEl.textContent     = `${text.trim().split(/\s+/).length} words · ${text.length} characters`;
+    noteEl.style.color     = 'var(--text-light)';
+  } else if (platform === 'instagram') {
+    titleEl.textContent    = handle ? `Post to Instagram as @${handle}` : 'Post to Instagram';
+    subEl.textContent      = 'Review your caption then hit "Post Now" — Instagram opens and your text is copied, just paste.';
+    confirmBtn.textContent = '◎ Post Now';
+    confirmBtn.className   = 'btn btn-instagram';
+    noteEl.textContent     = `${text.trim().split(/\s+/).length} words · ${text.length} characters`;
+    noteEl.style.color     = 'var(--text-light)';
+    igNote.style.display   = 'block';
+  }
+
+  preview.textContent = text;
+  modal.classList.add('open');
+}
+
+function closeQuickPostModal() {
+  document.getElementById('quickPostModal').classList.remove('open');
+}
+
+async function confirmQuickPost() {
+  const platform = pendingPost.platform;
+  const text     = platform === 'twitter' ? state.quickPostTweet : state.quickPostText;
+
+  if (platform === 'twitter') {
+    navigator.clipboard.writeText(text).catch(() => {});
+    closeQuickPostModal();
+    const encoded = encodeURIComponent(text.substring(0, 270));
+    window.open(`https://twitter.com/intent/tweet?text=${encoded}`, '_blank');
+    toast('Compose window opened — text is pre-filled. Hit Tweet!', 'success');
+
+  } else if (platform === 'linkedin') {
+    const li = ls('reflow_linkedin', {});
+    if (li.accessToken) {
+      // Direct post — no pasting needed
+      await postToLinkedIn(text);
+    } else {
+      // Not connected yet — fall back and prompt
+      navigator.clipboard.writeText(text).catch(() => {});
+      closeQuickPostModal();
+      window.open('https://www.linkedin.com/feed/?shareActive=true', '_blank');
+      toast('LinkedIn not connected — go to Settings to connect for one-click posting.', '');
+    }
+
+  } else if (platform === 'instagram') {
+    navigator.clipboard.writeText(text).catch(() => {});
+    closeQuickPostModal();
+    window.open('https://www.instagram.com/create/style/', '_blank');
+    toast('Copied! Paste your caption in Instagram.', 'success');
+  }
+}
+
+function downloadOutput() {
+  const text = document.getElementById('output-box').textContent;
+  const format = document.getElementById('r-format').value;
+  const blob = new Blob([text], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `reflow-${format}-${Date.now()}.txt`;
+  a.click();
+  toast('Downloaded!', 'success');
+}
+
+// ─── HISTORY ─────────────────────────────────────────────
+function saveToHistory(input, format, tone, output, client) {
+  const history = getHistory();
+  const entry = {
+    id: Date.now().toString(),
+    date: new Date().toISOString(),
+    format,
+    tone,
+    clientName: client?.name || '',
+    input,
+    output,
+    preview: output.substring(0, 80)
+  };
+  history.unshift(entry);
+  if (history.length > 20) history.pop();
+  lsSet('reflow_history', history);
+}
+
+function renderHistory() {
+  const history = getHistory();
+  const tbody = document.getElementById('history-tbody');
+
+  if (history.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="no-history">No history yet.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = history.map(h => `
+    <tr onclick="loadHistoryItem('${h.id}')">
+      <td>${formatDate(h.date)}</td>
+      <td>${escHtml(h.clientName || '—')}</td>
+      <td><span class="format-badge">${formatLabel(h.format)}</span></td>
+      <td class="preview-text">${escHtml(h.preview)}…</td>
+      <td><button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();loadHistoryItem('${h.id}')">Reload →</button></td>
+    </tr>
+  `).join('');
+}
+
+function loadHistoryItem(id) {
+  const history = getHistory();
+  const item = history.find(h => h.id === id);
+  if (!item) return;
+
+  navigate('repurpose');
+  setTimeout(() => {
+    document.getElementById('r-input').value = item.input;
+    updateInputCount(item.input);
+    document.getElementById('r-format').value = item.format;
+    document.getElementById('r-tone').value = item.tone;
+
+    const outputBox = document.getElementById('output-box');
+    outputBox.classList.remove('placeholder');
+    outputBox.textContent = item.output;
+    outputBox.style.display = 'block';
+
+    const words = item.output.trim().split(/\s+/).length;
+    document.getElementById('output-count').textContent = `${words.toLocaleString()} words · ${item.output.length.toLocaleString()} chars`;
+    document.getElementById('btn-copy').disabled = false;
+    document.getElementById('btn-regen').disabled = false;
+    document.getElementById('btn-download').disabled = false;
+
+    state.lastInput = item.input;
+    state.lastFormat = item.format;
+    state.lastTone = item.tone;
+
+    toast('History item loaded!');
+  }, 100);
+}
+
+function clearHistory() {
+  if (!confirm('Clear all history? This cannot be undone.')) return;
+  lsSet('reflow_history', []);
+  renderHistory();
+  toast('History cleared.');
+}
+
+// ─── CLIENTS ─────────────────────────────────────────────
+function renderClients() {
+  const clients = getClients();
+  const grid = document.getElementById('client-grid');
+
+  if (clients.length === 0) {
+    grid.innerHTML = `<div class="no-clients"><div class="empty-icon">◈</div><p>No clients yet. Add your first client profile.</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = clients.map(c => {
+    const hasSocials = c.linkedin || c.twitter || c.instagram;
+    const socialBadges = [
+      c.linkedin ? `<span class="social-handle-badge linkedin">in LinkedIn</span>` : '',
+      c.twitter  ? `<span class="social-handle-badge twitter">𝕏 @${escHtml(c.twitter)}</span>` : '',
+      c.instagram? `<span class="social-handle-badge instagram">◎ @${escHtml(c.instagram)}</span>` : '',
+      !hasSocials? `<span class="social-handle-badge missing">No socials linked</span>` : ''
+    ].join('');
+    return `
+    <div class="client-card">
+      <div class="client-name">${escHtml(c.name)}</div>
+      <div class="client-company">${escHtml(c.company || '')}</div>
+      ${c.industry ? `<div class="client-industry">${escHtml(c.industry)}</div>` : ''}
+      <div class="social-handles">${socialBadges}</div>
+      ${c.voice ? `<div class="client-voice">"${escHtml(c.voice.substring(0, 100))}${c.voice.length > 100 ? '…' : ''}"</div>` : ''}
+      <div class="card-actions">
+        <button class="btn btn-secondary btn-sm" onclick="openClientModal('${c.id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteClient('${c.id}')">Delete</button>
+        <button class="btn btn-navy btn-sm" onclick="repurposeAsClient('${c.id}')">Repurpose →</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openClientModal(id = null) {
+  state.editingClientId = id;
+  const modal = document.getElementById('clientModal');
+  const title = document.getElementById('client-modal-title');
+
+  if (id) {
+    const client = getClients().find(c => c.id === id);
+    if (!client) return;
+    title.textContent = 'Edit Client';
+    document.getElementById('c-name').value = client.name;
+    document.getElementById('c-company').value = client.company || '';
+    document.getElementById('c-industry').value = client.industry || '';
+    document.getElementById('c-voice').value = client.voice || '';
+    document.getElementById('c-linkedin').value = client.linkedin || '';
+    document.getElementById('c-twitter').value = client.twitter || '';
+    document.getElementById('c-instagram').value = client.instagram || '';
+  } else {
+    title.textContent = 'Add Client Profile';
+    document.getElementById('c-name').value = '';
+    document.getElementById('c-company').value = '';
+    document.getElementById('c-industry').value = '';
+    document.getElementById('c-voice').value = '';
+    document.getElementById('c-linkedin').value = '';
+    document.getElementById('c-twitter').value = '';
+    document.getElementById('c-instagram').value = '';
+  }
+
+  modal.classList.add('open');
+}
+
+function closeClientModal() {
+  document.getElementById('clientModal').classList.remove('open');
+  state.editingClientId = null;
+}
+
+function saveClient() {
+  const name = document.getElementById('c-name').value.trim();
+  if (!name) { toast('Client name is required.', 'error'); return; }
+
+  const clients = getClients();
+  const clientData = {
+    id: state.editingClientId || Date.now().toString(),
+    name,
+    company: document.getElementById('c-company').value.trim(),
+    industry: document.getElementById('c-industry').value.trim(),
+    voice: document.getElementById('c-voice').value.trim(),
+    linkedin: document.getElementById('c-linkedin').value.trim(),
+    twitter: document.getElementById('c-twitter').value.trim().replace(/^@/, ''),
+    instagram: document.getElementById('c-instagram').value.trim().replace(/^@/, '')
+  };
+
+  if (state.editingClientId) {
+    const idx = clients.findIndex(c => c.id === state.editingClientId);
+    if (idx > -1) clients[idx] = clientData;
+  } else {
+    clients.push(clientData);
+  }
+
+  lsSet('reflow_clients', clients);
+  closeClientModal();
+  renderClients();
+  toast(state.editingClientId ? 'Client updated!' : 'Client added!', 'success');
+}
+
+function deleteClient(id) {
+  if (!confirm('Delete this client profile?')) return;
+  const clients = getClients().filter(c => c.id !== id);
+  lsSet('reflow_clients', clients);
+  renderClients();
+  toast('Client deleted.');
+}
+
+function repurposeAsClient(id) {
+  navigate('repurpose');
+  setTimeout(() => {
+    document.getElementById('r-client-select').value = id;
+  }, 150);
+}
+
+// ─── SETTINGS ─────────────────────────────────────────────
+function loadSettingsForm() {
+  const s = getSettings();
+  document.getElementById('s-api-key').value = s.apiKey || '';
+  document.getElementById('s-user-name').value = s.userName || '';
+  document.getElementById('s-biz-name').value = s.bizName || '';
+  document.getElementById('s-default-format').value = s.defaultFormat || 'linkedin';
+  document.getElementById('s-default-tone').value = s.defaultTone || 'professional';
+  document.getElementById('s-student-mode').checked = !!s.studentMode;
+  document.getElementById('s-li-client-id').value = s.liClientId || '';
+  updateLinkedInStatus();
+}
+
+function saveSettings() {
+  const settings = {
+    apiKey: document.getElementById('s-api-key').value.trim(),
+    userName: document.getElementById('s-user-name').value.trim(),
+    bizName: document.getElementById('s-biz-name').value.trim(),
+    defaultFormat: document.getElementById('s-default-format').value,
+    defaultTone: document.getElementById('s-default-tone').value,
+    studentMode: document.getElementById('s-student-mode').checked,
+    liClientId: document.getElementById('s-li-client-id').value.trim()
+  };
+  lsSet('reflow_settings', settings);
+  updateApiStatus();
+  updateSidebarUser();
+  toast('Settings saved!', 'success');
+}
+
+// ─── LINKEDIN OAUTH ───────────────────────────────────────
+function updateLinkedInStatus() {
+  const li = ls('reflow_linkedin', {});
+  const banner = document.getElementById('li-connected-banner');
+  const nameEl = document.getElementById('li-connected-name');
+  if (!banner) return;
+  if (li.accessToken && li.name) {
+    banner.style.display = 'flex';
+    nameEl.textContent = li.name;
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+function connectLinkedIn() {
+  const settings = getSettings();
+  if (!settings.liClientId) {
+    toast('Save your LinkedIn App Client ID first.', 'error');
+    return;
+  }
+  const redirectUri = window.location.origin + window.location.pathname;
+  const oauthState = Math.random().toString(36).substring(2);
+  lsSet('li_oauth_state', oauthState);
+  const scope = 'openid profile w_member_social';
+  window.location.href =
+    `https://www.linkedin.com/oauth/v2/authorization?response_type=code` +
+    `&client_id=${encodeURIComponent(settings.liClientId)}` +
+    `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+    `&state=${oauthState}` +
+    `&scope=${encodeURIComponent(scope)}`;
+}
+
+function disconnectLinkedIn() {
+  localStorage.removeItem('reflow_linkedin');
+  updateLinkedInStatus();
+  toast('LinkedIn disconnected.');
+}
+
+async function handleLinkedInCallback() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  const returnedState = params.get('state');
+  if (!code) return;
+
+  // Clean the URL immediately
+  window.history.replaceState({}, document.title, window.location.pathname);
+
+  const savedState = ls('li_oauth_state');
+  if (returnedState !== savedState) {
+    toast('LinkedIn auth failed: state mismatch.', 'error');
+    return;
+  }
+
+  const settings = getSettings();
+  toast('Connecting LinkedIn…');
+
+  try {
+    const res = await fetch('/.netlify/functions/linkedin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'exchange',
+        code,
+        clientId: settings.liClientId,
+        redirectUri: window.location.origin + window.location.pathname
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(typeof data.error === 'string' ? data.error : JSON.stringify(data.error));
+
+    lsSet('reflow_linkedin', {
+      accessToken: data.accessToken,
+      personUrn: data.personUrn,
+      name: data.name
+    });
+
+    navigate('settings');
+    updateLinkedInStatus();
+    toast(`LinkedIn connected as ${data.name}!`, 'success');
+  } catch (err) {
+    toast(`LinkedIn connection failed: ${err.message}`, 'error');
+  }
+}
+
+async function postToLinkedIn(text) {
+  const li = ls('reflow_linkedin', {});
+  if (!li.accessToken) return false;
+
+  const confirmBtn = document.getElementById('qp-confirm-btn');
+  const original = confirmBtn.textContent;
+  confirmBtn.textContent = 'Posting…';
+  confirmBtn.disabled = true;
+
+  try {
+    const res = await fetch('/.netlify/functions/linkedin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'post',
+        accessToken: li.accessToken,
+        personUrn: li.personUrn,
+        text
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(typeof data.error === 'string' ? data.error : JSON.stringify(data.error));
+    closeQuickPostModal();
+    toast('Posted to LinkedIn!', 'success');
+    return true;
+  } catch (err) {
+    toast(`LinkedIn post failed: ${err.message}`, 'error');
+    return false;
+  } finally {
+    confirmBtn.textContent = original;
+    confirmBtn.disabled = false;
+  }
+}
+
+function toggleApiKeyVis() {
+  const inp = document.getElementById('s-api-key');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+// ─── UTILITIES ────────────────────────────────────────────
+function formatLabel(fmt) {
+  const map = {
+    linkedin: 'LinkedIn',
+    email: 'Email',
+    twitter: 'Twitter/X',
+    instagram: 'Instagram',
+    blog: 'Blog'
+  };
+  return map[fmt] || fmt;
+}
+
+function formatDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+(function init() {
+  updateApiStatus();
+  updateSidebarUser();
+  renderDashboard();
+  handleLinkedInCallback();
+
+  // Input counter on repurpose page
+  document.getElementById('r-input').addEventListener('input', function() {
+    updateInputCount(this.value);
+  });
+
+  // Close modals on overlay click
+  document.getElementById('clientModal').addEventListener('click', function(e) {
+    if (e.target === this) closeClientModal();
+  });
+  document.getElementById('quickPostModal').addEventListener('click', function(e) {
+    if (e.target === this) closeQuickPostModal();
+  });
+})();
+</script>
+</body>
+</html>
