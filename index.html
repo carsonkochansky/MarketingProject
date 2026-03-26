@@ -655,6 +655,15 @@
 
     .btn-instagram:hover { opacity: 0.88; transform: translateY(-1px); }
 
+    .btn-ordinal {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--coral) 100%);
+      color: white;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .btn-ordinal:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(233,30,140,0.35); }
+
     /* ── SOCIAL SETUP BANNER ─────────────────── */
     #social-setup-banner {
       display: none;
@@ -1307,6 +1316,22 @@
         </div>
       </div>
 
+      <!-- Ordinal Integration -->
+      <div class="card" style="margin-top:24px;">
+        <div class="card-header">
+          <h2>✦ Ordinal Integration</h2>
+          <p>Connect Ordinal to post directly to LinkedIn, Instagram, Twitter/X and more — all from one button</p>
+        </div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="form-label">Ordinal API Key</label>
+            <input type="password" class="form-input" id="s-ordinal-api-key" placeholder="ord_xxxxxxxxxxxxxxxxxxxx" />
+            <div class="form-hint">Find this in your Ordinal dashboard → Settings → API</div>
+          </div>
+          <button class="btn btn-ordinal" onclick="saveSettings()">Save Ordinal Key</button>
+        </div>
+      </div>
+
       <!-- LinkedIn Integration — full width below grid -->
       <div class="card" style="margin-top:24px;">
         <div class="card-header">
@@ -1448,7 +1473,8 @@ function getSettings() {
     defaultFormat: 'linkedin',
     defaultTone: 'professional',
     studentMode: false,
-    liClientId: ''
+    liClientId: '',
+    ordinalApiKey: ''
   });
 }
 
@@ -1763,19 +1789,13 @@ function renderQuickPostButtons(text, client, format) {
   const section = document.getElementById('quick-post-section');
   const container = document.getElementById('quick-post-buttons');
 
-  // Store in state so onclick handlers don't need to pass text inline
   state.quickPostText   = text;
-  state.quickPostTweet  = format === 'twitter' ? text.split('\n')[0] : text.substring(0, 270);
   state.quickPostClient = client || null;
 
-  const linkedinLabel = client?.linkedin ? 'Post to LinkedIn' : 'Post to LinkedIn';
-  const twitterLabel  = client?.twitter  ? `Post as @${client.twitter}` : 'Post to Twitter/X';
-  const igLabel       = client?.instagram? `Post as @${client.instagram}` : 'Post to Instagram';
-
   container.innerHTML = `
-    <button class="btn btn-linkedin btn-sm" onclick="openQuickPostModal('linkedin')">in ${linkedinLabel}</button>
-    <button class="btn btn-twitter btn-sm"  onclick="openQuickPostModal('twitter')">𝕏 ${twitterLabel}</button>
-    <button class="btn btn-instagram btn-sm" onclick="openQuickPostModal('instagram')">◎ ${igLabel}</button>`;
+    <button class="btn btn-ordinal btn-sm" onclick="openQuickPostModal('ordinal')">
+      ✦ Post to Ordinal
+    </button>`;
 
   section.classList.add('visible');
 }
@@ -1783,12 +1803,7 @@ function renderQuickPostButtons(text, client, format) {
 function openQuickPostModal(platform) {
   pendingPost.platform = platform;
 
-  const client     = state.quickPostClient;
-  const text       = platform === 'twitter' ? state.quickPostTweet : state.quickPostText;
-  const handle     = platform === 'twitter' ? (client?.twitter || '')
-                   : platform === 'linkedin' ? (client?.linkedin || '')
-                   : (client?.instagram || '');
-
+  const text       = state.quickPostText;
   const modal      = document.getElementById('quickPostModal');
   const titleEl    = document.getElementById('qp-modal-title');
   const subEl      = document.getElementById('qp-modal-sub');
@@ -1799,33 +1814,17 @@ function openQuickPostModal(platform) {
 
   igNote.style.display = 'none';
 
-  if (platform === 'twitter') {
-    titleEl.textContent    = handle ? `Post to Twitter/X as @${handle}` : 'Post to Twitter/X';
-    subEl.textContent      = 'First tweet shown below. Hit "Post Now" to open the compose window with text pre-filled.';
-    confirmBtn.textContent = '𝕏 Post Now';
-    confirmBtn.className   = 'btn btn-twitter';
-    noteEl.textContent     = `${text.length} / 280 characters`;
-    noteEl.style.color     = text.length > 280 ? '#dc2626' : 'var(--text-light)';
-  } else if (platform === 'linkedin') {
-    const liConnected = !!ls('reflow_linkedin', {}).accessToken;
-    const liName = ls('reflow_linkedin', {}).name || '';
-    titleEl.textContent    = liConnected ? `Post to LinkedIn as ${liName}` : 'Post to LinkedIn';
-    subEl.textContent      = liConnected
-      ? 'Review your post and hit "Post Now" — it posts directly to LinkedIn.'
-      : 'LinkedIn not connected yet. Hit "Post Now" to open the composer, or go to Settings → LinkedIn Integration to connect for one-click posting.';
-    confirmBtn.textContent = 'in Post Now';
-    confirmBtn.className   = 'btn btn-linkedin';
-    noteEl.textContent     = `${text.trim().split(/\s+/).length} words · ${text.length} characters`;
-    noteEl.style.color     = 'var(--text-light)';
-  } else if (platform === 'instagram') {
-    titleEl.textContent    = handle ? `Post to Instagram as @${handle}` : 'Post to Instagram';
-    subEl.textContent      = 'Review your caption then hit "Post Now" — Instagram opens and your text is copied, just paste.';
-    confirmBtn.textContent = '◎ Post Now';
-    confirmBtn.className   = 'btn btn-instagram';
-    noteEl.textContent     = `${text.trim().split(/\s+/).length} words · ${text.length} characters`;
-    noteEl.style.color     = 'var(--text-light)';
-    igNote.style.display   = 'block';
-  }
+  const settings = getSettings();
+  const hasKey   = !!settings.ordinalApiKey;
+
+  titleEl.textContent    = '✦ Post to Ordinal';
+  subEl.textContent      = hasKey
+    ? 'Review your content below and hit "Send to Ordinal" — it will be queued in your Ordinal dashboard for all connected platforms.'
+    : 'Add your Ordinal API key in Settings first, then come back here to post.';
+  confirmBtn.textContent = '✦ Send to Ordinal';
+  confirmBtn.className   = 'btn btn-ordinal';
+  noteEl.textContent     = `${text.trim().split(/\s+/).length} words · ${text.length} characters`;
+  noteEl.style.color     = 'var(--text-light)';
 
   preview.textContent = text;
   modal.classList.add('open');
@@ -1836,35 +1835,60 @@ function closeQuickPostModal() {
 }
 
 async function confirmQuickPost() {
-  const platform = pendingPost.platform;
-  const text     = platform === 'twitter' ? state.quickPostTweet : state.quickPostText;
+  const text     = state.quickPostText;
+  const settings = getSettings();
 
-  if (platform === 'twitter') {
-    navigator.clipboard.writeText(text).catch(() => {});
+  if (!settings.ordinalApiKey) {
+    toast('Add your Ordinal API key in Settings first.', 'error');
     closeQuickPostModal();
-    const encoded = encodeURIComponent(text.substring(0, 270));
-    window.open(`https://twitter.com/intent/tweet?text=${encoded}`, '_blank');
-    toast('Compose window opened — text is pre-filled. Hit Tweet!', 'success');
-
-  } else if (platform === 'linkedin') {
-    const li = ls('reflow_linkedin', {});
-    if (li.accessToken) {
-      // Direct post — no pasting needed
-      await postToLinkedIn(text);
-    } else {
-      // Not connected yet — fall back and prompt
-      navigator.clipboard.writeText(text).catch(() => {});
-      closeQuickPostModal();
-      window.open('https://www.linkedin.com/feed/?shareActive=true', '_blank');
-      toast('LinkedIn not connected — go to Settings to connect for one-click posting.', '');
-    }
-
-  } else if (platform === 'instagram') {
-    navigator.clipboard.writeText(text).catch(() => {});
-    closeQuickPostModal();
-    window.open('https://www.instagram.com/create/style/', '_blank');
-    toast('Copied! Paste your caption in Instagram.', 'success');
+    navigate('settings');
+    return;
   }
+
+  const confirmBtn = document.getElementById('qp-confirm-btn');
+  confirmBtn.disabled = true;
+  confirmBtn.textContent = 'Sending…';
+
+  try {
+    await postToOrdinal(text, settings.ordinalApiKey);
+    closeQuickPostModal();
+    toast('Sent to Ordinal! Check your Ordinal dashboard to review and publish.', 'success');
+  } catch (err) {
+    toast(`Ordinal error: ${err.message}`, 'error');
+  } finally {
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = '✦ Send to Ordinal';
+  }
+}
+
+async function postToOrdinal(text, apiKey) {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() + 2);
+  const publishAt = now.toISOString();
+
+  const body = {
+    title: `ReFlow — ${new Date().toLocaleDateString()}`,
+    status: 'ToDo',
+    publishAt,
+    linkedIn: { copy: text },
+    x: { copy: text.substring(0, 280) }
+  };
+
+  const res = await fetch('https://app.tryordinal.com/api/v1/posts', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `Status ${res.status}`);
+  }
+
+  return res.json();
 }
 
 function downloadOutput() {
@@ -2077,6 +2101,7 @@ function loadSettingsForm() {
   document.getElementById('s-default-tone').value = s.defaultTone || 'professional';
   document.getElementById('s-student-mode').checked = !!s.studentMode;
   document.getElementById('s-li-client-id').value = s.liClientId || '';
+  document.getElementById('s-ordinal-api-key').value = s.ordinalApiKey || '';
   updateLinkedInStatus();
 }
 
@@ -2088,7 +2113,8 @@ function saveSettings() {
     defaultFormat: document.getElementById('s-default-format').value,
     defaultTone: document.getElementById('s-default-tone').value,
     studentMode: document.getElementById('s-student-mode').checked,
-    liClientId: document.getElementById('s-li-client-id').value.trim()
+    liClientId: document.getElementById('s-li-client-id').value.trim(),
+    ordinalApiKey: document.getElementById('s-ordinal-api-key').value.trim()
   };
   lsSet('reflow_settings', settings);
   updateApiStatus();
