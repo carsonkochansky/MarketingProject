@@ -1455,23 +1455,19 @@
       </div>
     </div>
 
-    <!-- Schedule picker -->
-    <div style="margin-bottom:20px;">
-      <label style="font-size:12px;font-weight:600;color:var(--text-dark);display:block;margin-bottom:8px;">SCHEDULE FOR</label>
-      <div style="display:flex;gap:10px;align-items:center;">
-        <input type="datetime-local" class="form-input" id="qp-schedule-time" style="flex:1;font-size:14px;" />
-        <button class="btn btn-secondary btn-sm" onclick="setScheduleNow()" style="white-space:nowrap;">Post Now</button>
-      </div>
-      <div style="font-size:12px;color:var(--text-light);margin-top:4px;">Leave blank or click "Post Now" to send immediately</div>
-    </div>
-
     <div id="qp-instagram-note" style="display:none;" class="alert alert-info" style="margin-top:12px;font-size:12px;">
       Instagram doesn't support web compose links. Your caption has been copied — paste it into your post.
     </div>
 
-    <div class="modal-actions" style="margin-top:4px;">
-      <button class="btn btn-secondary" onclick="closeQuickPostModal()">Cancel</button>
-      <button class="btn btn-ordinal" id="qp-confirm-btn" onclick="confirmQuickPost()">✦ Send to Ordinal</button>
+    <div class="modal-actions" style="margin-top:16px;flex-direction:column;gap:10px;align-items:stretch;">
+      <div style="display:flex;gap:10px;align-items:center;">
+        <input type="datetime-local" class="form-input" id="qp-schedule-time" style="flex:1;font-size:14px;" />
+        <button class="btn btn-ordinal" id="qp-confirm-btn" onclick="confirmQuickPost()" style="white-space:nowrap;">✦ Send to Ordinal</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <button class="btn btn-secondary" onclick="closeQuickPostModal()">Cancel</button>
+        <button onclick="setScheduleNow()" style="background:none;border:none;color:var(--text-light);font-size:12px;cursor:pointer;text-decoration:underline;padding:0;">post now (no schedule)</button>
+      </div>
     </div>
   </div>
 </div>
