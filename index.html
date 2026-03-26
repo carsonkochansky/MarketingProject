@@ -1862,7 +1862,7 @@ async function confirmQuickPost() {
 }
 
 async function fetchOrdinalProfiles(apiKey) {
-  const res = await fetch('https://app.tryordinal.com/api/v1/profiles', {
+  const res = await fetch('https://app.tryordinal.com/api/v1/profiles/scheduling', {
     headers: { 'Authorization': `Bearer ${apiKey}` }
   });
   if (!res.ok) throw new Error(`Could not fetch profiles: ${res.status}`);
