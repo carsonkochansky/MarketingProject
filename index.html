@@ -1335,6 +1335,32 @@
         </div>
       </div>
 
+      <!-- Client Approvals -->
+      <div class="card" style="margin-top:24px;">
+        <div class="card-header">
+          <h2>✉ Client Approvals</h2>
+          <p>Notify clients when a draft is ready in Ordinal so they can review before it goes live</p>
+        </div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="form-label">Your email (CC on approval emails)</label>
+            <input type="email" class="form-input" id="s-user-email" placeholder="you@example.com" />
+            <div class="form-hint">You'll be CC'd on every approval email so you see any replies from clients</div>
+          </div>
+          <div class="toggle-wrap" style="margin-bottom:16px;">
+            <label class="toggle">
+              <input type="checkbox" id="s-auto-send-approval" />
+              <span class="toggle-slider"></span>
+            </label>
+            <div>
+              <div style="font-size:14px;font-weight:600;color:var(--text-dark);">Auto-send approval email after posting to Ordinal</div>
+              <div style="font-size:12px;color:var(--text-light);margin-top:2px;">When enabled, posting to Ordinal also opens a pre-filled approval email to the client automatically</div>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="saveSettings()">Save</button>
+        </div>
+      </div>
+
       <!-- LinkedIn Integration — full width below grid -->
       <div class="card" style="margin-top:24px;">
         <div class="card-header">
@@ -1554,7 +1580,9 @@ function getSettings() {
     defaultTone: 'professional',
     studentMode: false,
     liClientId: '',
-    ordinalApiKey: ''
+    ordinalApiKey: '',
+    userEmail: '',
+    autoSendApprovalEmail: false
   });
 }
 
@@ -1901,7 +1929,7 @@ function sendApprovalEmail() {
   const body    = encodeURIComponent(
 `Hi ${client.name},
 
-Here's your content draft for review. Please look it over and let me know if you'd like any changes before it goes live.
+Your content draft is ready. I've added it to Ordinal as a draft — you can log in to review and edit it directly there, or reply to this email with any changes you'd like.
 
 ---
 
@@ -1909,12 +1937,13 @@ ${text}
 
 ---
 
-Reply to this email with any edits, or give me the green light and I'll schedule it right away.
+Once you're happy with it, let me know and I'll schedule it to go live.
 
 ${sender}`
   );
 
-  window.open(`mailto:${client.email}?subject=${subject}&body=${body}`);
+  const cc = settings.userEmail ? `&cc=${encodeURIComponent(settings.userEmail)}` : '';
+  window.open(`mailto:${client.email}?subject=${subject}${cc}&body=${body}`);
   toast(`Approval email opened for ${client.name}`, 'success');
 }
 
@@ -2034,6 +2063,15 @@ async function confirmQuickPost() {
     closeQuickPostModal();
     const when = scheduleInput ? `Scheduled for ${new Date(scheduleInput).toLocaleString()}` : 'Queued for immediate posting';
     toast(`Sent to Ordinal! ${when}.`, 'success');
+
+    if (settings.autoSendApprovalEmail) {
+      const client = state.quickPostClient;
+      if (client?.email) {
+        sendApprovalEmail();
+      } else {
+        toast('Post sent! Add client email to auto-send approval.', '');
+      }
+    }
   } catch (err) {
     toast(`Ordinal error: ${err.message}`, 'error');
   } finally {
@@ -2309,6 +2347,8 @@ function loadSettingsForm() {
   document.getElementById('s-student-mode').checked = !!s.studentMode;
   document.getElementById('s-li-client-id').value = s.liClientId || '';
   document.getElementById('s-ordinal-api-key').value = s.ordinalApiKey || '';
+  document.getElementById('s-user-email').value = s.userEmail || '';
+  document.getElementById('s-auto-send-approval').checked = !!s.autoSendApprovalEmail;
   updateLinkedInStatus();
 }
 
@@ -2321,7 +2361,9 @@ function saveSettings() {
     defaultTone: document.getElementById('s-default-tone').value,
     studentMode: document.getElementById('s-student-mode').checked,
     liClientId: document.getElementById('s-li-client-id').value.trim(),
-    ordinalApiKey: document.getElementById('s-ordinal-api-key').value.trim()
+    ordinalApiKey: document.getElementById('s-ordinal-api-key').value.trim(),
+    userEmail: document.getElementById('s-user-email').value.trim(),
+    autoSendApprovalEmail: document.getElementById('s-auto-send-approval').checked
   };
   lsSet('reflow_settings', settings);
   updateApiStatus();
