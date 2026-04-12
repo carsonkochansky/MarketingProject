@@ -3,7 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ReFlow — Content Repurposing Platform</title>
+  <title>ReFlow — AI Content Repurposing Platform</title>
+  <meta name="description" content="ReFlow turns any long-form content into platform-ready LinkedIn, Twitter, and Instagram posts in seconds — powered by Claude AI." />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:title" content="ReFlow — AI Content Repurposing Platform" />
+  <meta property="og:description" content="Turn any content into platform-ready posts in seconds." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://marketingprojectkochanskygonzalez.netlify.app/" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="ReFlow — AI Content Repurposing" />
+  <meta name="twitter:description" content="Turn any content into platform-ready posts in seconds." />
   <style>
     :root {
       --navy: #073b3f;
@@ -30,6 +39,7 @@
       --sidebar-width: 220px;
     }
 
+    html { scroll-behavior: smooth; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
@@ -884,11 +894,131 @@
       }
     }
 
+    @media (max-width: 768px) {
+      .pricing-grid { grid-template-columns: 1fr !important; }
+      .landing-features { grid-template-columns: 1fr !important; }
+      .landing-hero { flex-direction: column; gap: 32px; }
+      .landing-ctas { flex-direction: column; align-items: flex-start; }
+      .about-team { flex-direction: column; align-items: center; }
+      .stat-grid { grid-template-columns: 1fr 1fr; }
+    }
+
     @media (max-width: 600px) {
       #page-content { padding: 16px; }
       .topbar { padding: 0 16px; }
       .stat-grid { grid-template-columns: 1fr 1fr; }
+      .landing-hero h1 { font-size: 28px; }
     }
+
+    /* ── LANDING PAGE ───────────────────────────── */
+    #page-landing { max-width: 100%; padding: 0; }
+    .landing-hero {
+      display: flex; align-items: center; gap: 60px;
+      padding: 80px 60px 60px; max-width: 1100px; margin: 0 auto;
+    }
+    .landing-hero-copy { flex: 1; }
+    .landing-hero h1 {
+      font-size: 48px; font-weight: 900; line-height: 1.1;
+      color: var(--text-dark); margin-bottom: 20px; letter-spacing: -1px;
+    }
+    .landing-hero h1 span { color: var(--coral); }
+    .landing-hero p {
+      font-size: 18px; color: var(--text-mid); line-height: 1.6; margin-bottom: 32px; max-width: 460px;
+    }
+    .landing-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+    .landing-hero-mockup {
+      flex: 1; max-width: 480px;
+      background: var(--navy); border-radius: 16px; padding: 24px;
+      box-shadow: var(--shadow-lg); min-height: 280px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .mockup-bar {
+      display: flex; gap: 6px; margin-bottom: 8px;
+    }
+    .mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .mockup-input {
+      background: rgba(255,255,255,0.07); border-radius: 8px; padding: 16px;
+      font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.6;
+    }
+    .mockup-arrow {
+      text-align: center; font-size: 20px; color: var(--coral); font-weight: 700;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .mockup-output {
+      background: rgba(255,255,255,0.1); border-radius: 8px; padding: 16px;
+      font-size: 12px; color: rgba(255,255,255,0.85); line-height: 1.7;
+    }
+    .mockup-badge {
+      display: inline-block; background: var(--coral); color: white;
+      font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px;
+      margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .landing-features {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px;
+      padding: 0 60px 60px; max-width: 1100px; margin: 0 auto;
+    }
+    .feature-card {
+      background: white; border-radius: var(--radius); padding: 32px 28px;
+      border: 1.5px solid var(--gray-200); text-align: center;
+      box-shadow: var(--shadow-sm);
+    }
+    .feature-icon {
+      font-size: 32px; margin-bottom: 16px;
+    }
+    .feature-card h3 { font-size: 16px; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
+    .feature-card p { font-size: 14px; color: var(--text-light); line-height: 1.6; }
+    .landing-social-proof {
+      background: var(--gray-50); border-top: 1px solid var(--gray-200);
+      border-bottom: 1px solid var(--gray-200); padding: 48px 60px;
+    }
+    .landing-social-proof h2 {
+      text-align: center; font-size: 14px; font-weight: 700; color: var(--text-light);
+      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 32px;
+    }
+    .testimonials-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 860px; margin: 0 auto;
+    }
+    .testimonial-card {
+      background: white; border-radius: var(--radius); padding: 24px;
+      border: 1px solid var(--gray-200); box-shadow: var(--shadow-sm);
+    }
+    .testimonial-card p { font-size: 14px; color: var(--text-mid); line-height: 1.7; margin-bottom: 16px; font-style: italic; }
+    .testimonial-author { font-size: 13px; font-weight: 600; color: var(--text-dark); }
+    .about-section {
+      padding: 60px; max-width: 1100px; margin: 0 auto;
+    }
+    .about-section h2 { font-size: 28px; font-weight: 800; color: var(--text-dark); margin-bottom: 8px; }
+    .about-section .about-sub { font-size: 16px; color: var(--text-light); margin-bottom: 40px; }
+    .about-team { display: flex; gap: 40px; margin-bottom: 48px; }
+    .about-person { flex: 1; text-align: center; }
+    .avatar-circle {
+      width: 96px; height: 96px; border-radius: 50%; background: var(--gray-200);
+      margin: 0 auto 16px; display: flex; align-items: center; justify-content: center;
+      font-size: 32px; color: var(--gray-500);
+    }
+    .about-person h3 { font-size: 16px; font-weight: 700; color: var(--text-dark); margin-bottom: 6px; }
+    .about-person p { font-size: 13px; color: var(--text-light); line-height: 1.6; }
+    .trusted-bar { text-align: center; }
+    .trusted-bar p { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-light); margin-bottom: 20px; }
+    .logo-placeholders { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+    .logo-placeholder {
+      width: 120px; height: 44px; background: var(--gray-100); border-radius: 8px;
+      border: 1.5px dashed var(--gray-300);
+    }
+    .empty-state-card {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 48px 24px; text-align: center;
+    }
+    .empty-state-card .empty-icon { font-size: 36px; margin-bottom: 12px; }
+    .empty-state-card h3 { font-size: 16px; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
+    .empty-state-card p { font-size: 14px; color: var(--text-light); margin-bottom: 20px; max-width: 300px; line-height: 1.6; }
+    .upgrade-badge {
+      background: var(--coral); color: white; font-size: 12px; font-weight: 700;
+      padding: 6px 14px; border-radius: 20px; border: none; cursor: pointer;
+      letter-spacing: 0.3px;
+    }
+    .upgrade-badge:hover { background: var(--coral-hover); }
 
     /* ── MISC ────────────────────────────────── */
     hr { border: none; border-top: 1px solid var(--gray-100); margin: 24px 0; }
@@ -992,7 +1122,8 @@
       <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
       <span class="topbar-title" id="topbar-title">Dashboard</span>
     </div>
-    <div class="topbar-right">
+    <div class="topbar-right" style="display:flex;align-items:center;gap:12px;">
+      <button class="upgrade-badge" id="upgrade-topbar-btn" onclick="navigate('pricing')" style="display:none;">⚡ Upgrade</button>
       <div class="api-status" id="api-status-badge">
         <div class="dot"></div>
         <span id="api-status-text">No API Key</span>
@@ -1002,8 +1133,107 @@
 
   <div id="page-content">
 
+    <!-- ─── LANDING PAGE ────────────────────── -->
+    <div class="page active" id="page-landing">
+
+      <!-- Hero -->
+      <div class="landing-hero">
+        <div class="landing-hero-copy">
+          <h1>Turn any content into platform-ready posts — <span>in seconds.</span></h1>
+          <p>ReFlow uses Claude AI to transform podcasts, articles, and interviews into polished LinkedIn, Twitter, and Instagram posts — tailored to each client's voice, automatically.</p>
+          <div class="landing-ctas">
+            <button class="btn btn-primary" style="font-size:15px;padding:14px 28px;" onclick="navigate('dashboard')">Start Repurposing Free</button>
+            <button class="btn btn-secondary" style="font-size:15px;padding:14px 28px;" onclick="navigate('pricing')">See Pricing</button>
+          </div>
+        </div>
+        <div class="landing-hero-mockup">
+          <div class="mockup-bar">
+            <div class="mockup-dot" style="background:#ff5f57;"></div>
+            <div class="mockup-dot" style="background:#ffbd2e;"></div>
+            <div class="mockup-dot" style="background:#28c840;"></div>
+          </div>
+          <div class="mockup-input">
+            "In this episode we talked about why most founders fail at content — they try to create from scratch instead of repurposing what they already have from interviews, podcasts, and internal docs..."
+          </div>
+          <div class="mockup-arrow">✦ repurposing...</div>
+          <div class="mockup-output">
+            <div class="mockup-badge">LinkedIn · Professional</div>
+            Most founders waste hours staring at a blank page.<br><br>
+            The secret? You already have months of content — you just haven't repurposed it yet.<br><br>
+            Here's the framework we use with every client →
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature highlights -->
+      <div class="landing-features">
+        <div class="feature-card">
+          <div class="feature-icon">🤖</div>
+          <h3>AI-Powered Repurposing</h3>
+          <p>Claude reads your content and writes platform-native posts — not just summaries. Each piece is crafted for the format.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🚀</div>
+          <h3>Multi-Platform Output</h3>
+          <p>One input, five formats. LinkedIn, Twitter/X, Instagram, thought leadership threads — all from a single paste.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">👥</div>
+          <h3>Client Profiles</h3>
+          <p>Save each client's voice, tone, and industry. ReFlow adapts every output to sound like them — not like a robot.</p>
+        </div>
+      </div>
+
+      <!-- Social proof -->
+      <div class="landing-social-proof">
+        <h2>What our clients say</h2>
+        <!-- REPLACE WITH REAL TESTIMONIALS -->
+        <div class="testimonials-row">
+          <div class="testimonial-card">
+            <p>"ReFlow cut our content workflow from 3 hours down to 20 minutes. Our LinkedIn engagement doubled in the first month."</p>
+            <div class="testimonial-author">— Founder, B2B SaaS Company</div>
+          </div>
+          <div class="testimonial-card">
+            <p>"I was skeptical AI could capture my voice. After the first week I couldn't tell the difference — and neither could my audience."</p>
+            <div class="testimonial-author">— Executive Coach, 14k LinkedIn followers</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- About section -->
+      <div class="about-section">
+        <h2>Built by people who get it</h2>
+        <div class="about-sub">Built by Dartmouth students obsessed with helping founders grow online.</div>
+        <div class="about-team">
+          <div class="about-person">
+            <div class="avatar-circle">👤</div>
+            <h3>Carson Kochansky</h3>
+            <p>Carson studies at Dartmouth and has spent the last two years helping B2B founders build audiences on LinkedIn through strategic content. He obsesses over voice, positioning, and what actually makes people stop scrolling.</p>
+          </div>
+          <div class="about-person">
+            <div class="avatar-circle">👤</div>
+            <h3>Lucas Gonzalez</h3>
+            <p>Lucas is a Dartmouth student and full-stack developer who built ReFlow from the ground up. He believes the best tools get out of the way — fast, simple, and built for the people actually using them.</p>
+          </div>
+        </div>
+
+        <!-- Trusted by -->
+        <div class="trusted-bar">
+          <p>Trusted by</p>
+          <!-- REPLACE WITH REAL LOGOS -->
+          <div class="logo-placeholders">
+            <div class="logo-placeholder"></div>
+            <div class="logo-placeholder"></div>
+            <div class="logo-placeholder"></div>
+            <div class="logo-placeholder"></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-landing -->
+
     <!-- ─── DASHBOARD ────────────────────────── -->
-    <div class="page active" id="page-dashboard">
+    <div class="page" id="page-dashboard">
       <div class="page-header">
         <h1>Welcome back 👋</h1>
         <p>Here's your content repurposing overview.</p>
@@ -1036,13 +1266,23 @@
           <div class="stat-value" style="font-size:18px;margin-top:4px;" id="stat-format">—</div>
           <div class="stat-sub">most used</div>
         </div>
+        <div class="stat-card" id="stat-usage-card">
+          <div class="stat-label">Free Usage</div>
+          <div class="stat-value" style="font-size:18px;margin-top:4px;" id="stat-usage">0 / 10</div>
+          <div class="stat-sub">pieces this month</div>
+        </div>
       </div>
 
       <div class="recent-section">
         <h3>Recent Activity</h3>
         <div class="card">
           <div id="dash-recent" style="padding:0;">
-            <div class="no-history" style="padding:40px;">No content repurposed yet. Hit the button above to get started!</div>
+            <div class="empty-state-card">
+              <div class="empty-icon">📝</div>
+              <h3>No content yet</h3>
+              <p>Paste any article, podcast transcript, or interview into the Repurpose tool to generate your first post.</p>
+              <button class="btn btn-primary" onclick="navigate('repurpose')">✦ Start Repurposing</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1404,15 +1644,32 @@
         <p>Done-for-you LinkedIn content that drives real revenue. No fluff, no filler.</p>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:860px;">
+      <div class="pricing-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;max-width:1100px;">
 
-        <!-- Tier 2 -->
+        <!-- Tier 1 — DIY Free -->
+        <div class="card" style="border:2px solid var(--gray-200);">
+          <div class="card-body" style="padding:32px;">
+            <div style="font-size:12px;font-weight:700;letter-spacing:1px;color:var(--text-light);text-transform:uppercase;margin-bottom:12px;">DIY</div>
+            <div style="font-size:42px;font-weight:800;color:var(--text-dark);line-height:1;">Free</div>
+            <p style="font-size:14px;color:var(--text-light);margin:12px 0 28px;">Bring your own Claude API key and repurpose content yourself.</p>
+            <ul style="list-style:none;padding:0;margin:0 0 32px;display:flex;flex-direction:column;gap:12px;">
+              <li style="font-size:14px;display:flex;gap:10px;"><span style="color:var(--navy-light);font-weight:700;">✓</span> Up to 10 pieces per month</li>
+              <li style="font-size:14px;display:flex;gap:10px;"><span style="color:var(--navy-light);font-weight:700;">✓</span> LinkedIn, Twitter/X, Instagram</li>
+              <li style="font-size:14px;display:flex;gap:10px;"><span style="color:var(--navy-light);font-weight:700;">✓</span> All formats & tones</li>
+              <li style="font-size:14px;display:flex;gap:10px;"><span style="color:var(--navy-light);font-weight:700;">✓</span> Client profiles</li>
+              <li style="font-size:14px;display:flex;gap:10px;"><span style="color:var(--navy-light);font-weight:700;">✓</span> Bring your own Claude API key</li>
+            </ul>
+            <button class="btn btn-secondary" style="display:block;width:100%;" onclick="navigate('dashboard')">Start Free</button>
+          </div>
+        </div>
+
+        <!-- Tier 2 — Co-Pilot -->
         <div class="card" style="border:2px solid var(--gray-200);">
           <div class="card-body" style="padding:32px;">
             <div style="font-size:12px;font-weight:700;letter-spacing:1px;color:var(--text-light);text-transform:uppercase;margin-bottom:12px;">The Co-Pilot</div>
             <div style="font-size:42px;font-weight:800;color:var(--text-dark);line-height:1;">$1,500<span style="font-size:16px;font-weight:500;color:var(--text-light)">/mo</span></div>
             <p style="font-size:14px;color:var(--text-light);margin:12px 0 28px;">We repurpose your content. You review, approve, and post.</p>
-            <ul style="list-style:none;padding:0;margin:0 0 32px;display:flex;flex-direction:column;gap:12px;">
+            <ul style="list-style:none;padding:0;margin:0 0 24px;display:flex;flex-direction:column;gap:12px;">
               <li style="font-size:14px;display:flex;gap:10px;"><span style="color:var(--navy-light);font-weight:700;">✓</span> 8–12 repurposed posts per month</li>
               <li style="font-size:14px;display:flex;gap:10px;"><span style="color:var(--navy-light);font-weight:700;">✓</span> LinkedIn, Twitter/X, Instagram</li>
               <li style="font-size:14px;display:flex;gap:10px;"><span style="color:var(--navy-light);font-weight:700;">✓</span> AI-optimized copy for each platform</li>
@@ -1420,18 +1677,20 @@
               <li style="font-size:14px;display:flex;gap:10px;"><span style="color:var(--navy-light);font-weight:700;">✓</span> Monthly strategy call</li>
               <li style="font-size:14px;display:flex;gap:10px;"><span style="color:var(--navy-light);font-weight:700;">✓</span> You control final publish</li>
             </ul>
-            <a href="mailto:carsonkochansky@gmail.com?subject=Interested in The Co-Pilot Plan&body=Hi Carson, I'm interested in learning more about the Co-Pilot plan." class="btn btn-navy" style="display:block;text-align:center;text-decoration:none;">Book a Call</a>
+            <div style="font-size:12px;color:var(--coral);font-weight:600;margin-bottom:16px;">⚡ Only 3 client spots available this month</div>
+            <!-- REPLACE WITH REAL CALENDLY LINK -->
+            <a href="https://calendly.com" target="_blank" class="btn btn-navy" style="display:block;text-align:center;text-decoration:none;">Book a Call</a>
           </div>
         </div>
 
-        <!-- Tier 3 -->
+        <!-- Tier 3 — Full Engine -->
         <div class="card" style="border:2px solid var(--coral);position:relative;">
           <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--coral);color:white;font-size:11px;font-weight:700;letter-spacing:1px;padding:4px 16px;border-radius:20px;text-transform:uppercase;white-space:nowrap;">Most Popular</div>
           <div class="card-body" style="padding:32px;">
             <div style="font-size:12px;font-weight:700;letter-spacing:1px;color:var(--coral);text-transform:uppercase;margin-bottom:12px;">The Full Engine</div>
             <div style="font-size:42px;font-weight:800;color:var(--text-dark);line-height:1;">$4,000<span style="font-size:16px;font-weight:500;color:var(--text-light)">/mo</span></div>
             <p style="font-size:14px;color:var(--text-light);margin:12px 0 28px;">We run your LinkedIn end to end. You show up, we handle the rest.</p>
-            <ul style="list-style:none;padding:0;margin:0 0 32px;display:flex;flex-direction:column;gap:12px;">
+            <ul style="list-style:none;padding:0;margin:0 0 24px;display:flex;flex-direction:column;gap:12px;">
               <li style="font-size:14px;display:flex;gap:10px;"><span style="color:var(--coral);font-weight:700;">✓</span> Everything in The Co-Pilot</li>
               <li style="font-size:14px;display:flex;gap:10px;"><span style="color:var(--coral);font-weight:700;">✓</span> Original content ideation & strategy</li>
               <li style="font-size:14px;display:flex;gap:10px;"><span style="color:var(--coral);font-weight:700;">✓</span> Full scheduling & posting — done for you</li>
@@ -1439,14 +1698,41 @@
               <li style="font-size:14px;display:flex;gap:10px;"><span style="color:var(--coral);font-weight:700;">✓</span> Engagement monitoring</li>
               <li style="font-size:14px;display:flex;gap:10px;"><span style="color:var(--coral);font-weight:700;">✓</span> Dedicated account manager</li>
             </ul>
-            <a href="mailto:carsonkochansky@gmail.com?subject=Interested in The Full Engine Plan&body=Hi Carson, I'm interested in learning more about the Full Engine plan." class="btn btn-primary" style="display:block;text-align:center;text-decoration:none;">Book a Call</a>
+            <div style="font-size:12px;color:var(--coral);font-weight:600;margin-bottom:16px;">⚡ Only 3 client spots available this month</div>
+            <!-- REPLACE WITH REAL CALENDLY LINK -->
+            <a href="https://calendly.com" target="_blank" class="btn btn-primary" style="display:block;text-align:center;text-decoration:none;">Book a Call</a>
           </div>
         </div>
 
       </div>
 
+      <!-- FAQ Section -->
+      <div style="margin-top:48px;max-width:700px;">
+        <h2 style="font-size:20px;font-weight:800;color:var(--text-dark);margin-bottom:24px;">Frequently Asked Questions</h2>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card">
+            <div class="card-body" style="padding:20px 24px;">
+              <div style="font-size:15px;font-weight:700;color:var(--text-dark);margin-bottom:8px;">How does billing work?</div>
+              <div style="font-size:14px;color:var(--text-light);line-height:1.6;">Paid plans are billed monthly. We'll invoice you after our intro call and you can cancel any time before your next billing cycle. DIY usage is tracked monthly in your browser — it resets on the 1st of each month.</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body" style="padding:20px 24px;">
+              <div style="font-size:15px;font-weight:700;color:var(--text-dark);margin-bottom:8px;">Can I cancel anytime?</div>
+              <div style="font-size:14px;color:var(--text-light);line-height:1.6;">Yes — no long-term contracts on any plan. You can cancel with 30 days notice and we'll wrap up any in-progress content before your last billing date.</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body" style="padding:20px 24px;">
+              <div style="font-size:15px;font-weight:700;color:var(--text-dark);margin-bottom:8px;">Do I need a Claude API key?</div>
+              <div style="font-size:14px;color:var(--text-light);line-height:1.6;">Only for the free DIY tier. The Co-Pilot and Full Engine plans are fully managed by our team — you don't touch any API keys or settings. Get a free Claude API key at <strong>console.anthropic.com</strong>.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Bottom note -->
-      <div style="margin-top:32px;max-width:860px;padding:20px 24px;background:var(--gray-50);border-radius:var(--radius);border:1px solid var(--gray-200);">
+      <div style="margin-top:32px;max-width:1100px;padding:20px 24px;background:var(--gray-50);border-radius:var(--radius);border:1px solid var(--gray-200);">
         <p style="font-size:14px;color:var(--text-light);margin:0;text-align:center;">
           Not sure which plan is right for you? <a href="mailto:carsonkochansky@gmail.com?subject=ReFlow - Question about plans" style="color:var(--coral);font-weight:600;text-decoration:none;">Send us a message</a> and we'll help you figure it out.
         </p>
@@ -1548,6 +1834,66 @@
   </div>
 </div>
 
+<!-- Upgrade Modal -->
+<div class="modal-overlay" id="upgradeModal">
+  <div class="modal" style="text-align:center;max-width:440px;">
+    <div style="font-size:40px;margin-bottom:12px;">⚡</div>
+    <h3 style="margin-bottom:10px;">You've hit your free limit</h3>
+    <p style="font-size:14px;color:var(--text-light);margin-bottom:24px;">You've used all 10 free pieces this month. Upgrade to Pro for unlimited access, priority support, and all future features.</p>
+    <!-- REPLACE WITH REAL STRIPE LINK -->
+    <!-- In production, reflow_pro would be set server-side via a Stripe webhook, not client-side -->
+    <a href="https://buy.stripe.com/placeholder" target="_blank" class="btn btn-primary" style="display:block;margin-bottom:12px;font-size:15px;padding:14px;">Upgrade to Pro — $29/mo</a>
+    <button class="btn btn-secondary" style="width:100%;" onclick="document.getElementById('upgradeModal').classList.remove('open')">Maybe later</button>
+  </div>
+</div>
+
+<!-- Onboarding Modal -->
+<div class="modal-overlay" id="onboardingModal">
+  <div class="modal" style="max-width:480px;">
+    <div id="onboard-step-1">
+      <div style="font-size:36px;text-align:center;margin-bottom:12px;">✦</div>
+      <h3 style="text-align:center;margin-bottom:8px;">Welcome to ReFlow</h3>
+      <p style="font-size:14px;color:var(--text-light);text-align:center;margin-bottom:24px;">ReFlow uses Claude AI to turn any long-form content — podcasts, articles, interviews — into polished posts ready for LinkedIn, Twitter, Instagram, and more.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:28px;">
+        <div style="text-align:center;padding:16px 8px;background:var(--gray-50);border-radius:var(--radius-sm);">
+          <div style="font-size:22px;margin-bottom:6px;">🤖</div>
+          <div style="font-size:12px;font-weight:600;color:var(--text-dark);">AI-Powered</div>
+          <div style="font-size:11px;color:var(--text-light);margin-top:2px;">Claude writes it</div>
+        </div>
+        <div style="text-align:center;padding:16px 8px;background:var(--gray-50);border-radius:var(--radius-sm);">
+          <div style="font-size:22px;margin-bottom:6px;">🚀</div>
+          <div style="font-size:12px;font-weight:600;color:var(--text-dark);">Multi-Platform</div>
+          <div style="font-size:11px;color:var(--text-light);margin-top:2px;">LinkedIn, X, Instagram</div>
+        </div>
+        <div style="text-align:center;padding:16px 8px;background:var(--gray-50);border-radius:var(--radius-sm);">
+          <div style="font-size:22px;margin-bottom:6px;">👥</div>
+          <div style="font-size:12px;font-weight:600;color:var(--text-dark);">Client Profiles</div>
+          <div style="font-size:11px;color:var(--text-light);margin-top:2px;">Tailored voice per client</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;" onclick="onboardStep(2)">Get Started →</button>
+      <div style="text-align:center;margin-top:12px;"><a href="#" style="font-size:13px;color:var(--text-light);" onclick="skipOnboarding()">Skip for now</a></div>
+    </div>
+    <div id="onboard-step-2" style="display:none;">
+      <h3 style="margin-bottom:8px;">Add your Claude API key</h3>
+      <p style="font-size:14px;color:var(--text-light);margin-bottom:20px;">ReFlow uses Claude to generate content. Get your free API key at <strong>console.anthropic.com</strong> — it takes 2 minutes.</p>
+      <div class="form-group">
+        <label class="form-label">Claude API Key</label>
+        <input type="password" class="form-input" id="onboard-api-key" placeholder="sk-ant-..." />
+        <div class="form-hint">Your key is stored only in your browser — never sent to our servers.</div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="onboardSaveKey()">Save & Continue →</button>
+      <div style="text-align:center;margin-top:12px;"><a href="#" style="font-size:13px;color:var(--text-light);" onclick="skipOnboarding()">Skip for now</a></div>
+    </div>
+    <div id="onboard-step-3" style="display:none;text-align:center;">
+      <div style="font-size:48px;margin-bottom:12px;">🎉</div>
+      <h3 style="margin-bottom:8px;">You're all set!</h3>
+      <p style="font-size:14px;color:var(--text-light);margin-bottom:24px;">Paste any content, pick your format, and hit Repurpose. ReFlow handles the rest.</p>
+      <button class="btn btn-primary" style="width:100%;" onclick="finishOnboarding()">Start Repurposing →</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ─── STATE ───────────────────────────────────────────────
 let state = {
@@ -1589,21 +1935,58 @@ function getSettings() {
 function getClients() { return ls('reflow_clients', []); }
 function getHistory() { return ls('reflow_history', []); }
 
+// ─── USAGE / PAYWALL ─────────────────────────────────────
+function getMonthKey() { return `reflow_usage_${new Date().toISOString().slice(0, 7)}`; }
+function getUsageCount() { return ls(getMonthKey(), 0); }
+function incrementUsage() { lsSet(getMonthKey(), getUsageCount() + 1); }
+// isPro checks for the 'reflow_pro' flag. In production this would be set
+// server-side via a Stripe webhook after payment — never trust client-side alone.
+function isPro() { return localStorage.getItem('reflow_pro') === 'true'; }
+function showUpgradeModal() { document.getElementById('upgradeModal').classList.add('open'); }
+
+// ─── ONBOARDING ──────────────────────────────────────────
+function onboardStep(n) {
+  [1, 2, 3].forEach(i => {
+    document.getElementById(`onboard-step-${i}`).style.display = i === n ? 'block' : 'none';
+  });
+}
+function skipOnboarding() {
+  document.getElementById('onboardingModal').classList.remove('open');
+}
+function onboardSaveKey() {
+  const key = document.getElementById('onboard-api-key').value.trim();
+  if (key) {
+    const s = getSettings();
+    s.apiKey = key;
+    lsSet('reflow_settings', s);
+    updateApiStatus();
+  }
+  onboardStep(3);
+}
+function finishOnboarding() {
+  lsSet('reflow_onboarded', true);
+  document.getElementById('onboardingModal').classList.remove('open');
+  navigate('repurpose');
+}
+
 // ─── NAVIGATION ──────────────────────────────────────────
 function navigate(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById(`page-${page}`).classList.add('active');
-  document.querySelector(`[data-page="${page}"]`).classList.add('active');
+  const navEl = document.querySelector(`[data-page="${page}"]`);
+  if (navEl) navEl.classList.add('active');
 
   const titles = {
+    landing: 'ReFlow',
     dashboard: 'Dashboard',
     repurpose: 'Repurpose Content',
     clients: 'Client Profiles',
     history: 'History',
+    pricing: 'Pricing',
     settings: 'Settings'
   };
-  document.getElementById('topbar-title').textContent = titles[page];
+  document.getElementById('topbar-title').textContent = titles[page] || page;
   state.currentPage = page;
 
   if (page === 'dashboard') renderDashboard();
@@ -1611,6 +1994,10 @@ function navigate(page) {
   if (page === 'clients') renderClients();
   if (page === 'history') renderHistory();
   if (page === 'settings') loadSettingsForm();
+
+  // Show/hide upgrade badge for non-pro users (hide on landing page)
+  const upgradeBtn = document.getElementById('upgrade-topbar-btn');
+  if (upgradeBtn) upgradeBtn.style.display = (!isPro() && page !== 'landing' && page !== 'pricing') ? 'inline-block' : 'none';
 
   closeSidebar();
 }
@@ -1668,6 +2055,16 @@ function renderDashboard() {
   document.getElementById('stat-clients').textContent = clients.length;
   document.getElementById('stat-week').textContent = history.filter(h => new Date(h.date) > weekAgo).length;
 
+  // Usage stat
+  const usageCard = document.getElementById('stat-usage-card');
+  const usageEl = document.getElementById('stat-usage');
+  if (isPro()) {
+    usageCard.style.display = 'none';
+  } else {
+    usageCard.style.display = '';
+    usageEl.textContent = `${getUsageCount()} / 10`;
+  }
+
   // Top format
   if (history.length > 0) {
     const counts = {};
@@ -1679,7 +2076,12 @@ function renderDashboard() {
   // Recent list
   const container = document.getElementById('dash-recent');
   if (history.length === 0) {
-    container.innerHTML = '<div class="no-history" style="padding:40px;">No content repurposed yet. Hit the button above to get started!</div>';
+    container.innerHTML = `<div class="empty-state-card">
+      <div class="empty-icon">📝</div>
+      <h3>No content yet</h3>
+      <p>Paste any article, podcast transcript, or interview into the Repurpose tool to generate your first post.</p>
+      <button class="btn btn-primary" onclick="navigate('repurpose')">✦ Start Repurposing</button>
+    </div>`;
     return;
   }
 
@@ -1785,6 +2187,12 @@ async function repurposeContent() {
     return;
   }
 
+  // Usage gate: free tier limited to 10 pieces/month
+  if (!isPro() && getUsageCount() >= 10) {
+    showUpgradeModal();
+    return;
+  }
+
   const input = document.getElementById('r-input').value.trim();
   if (!input) {
     toast('Please paste some content first.', 'error');
@@ -1866,6 +2274,9 @@ async function callClaude(settings, input, format, tone, client) {
     document.getElementById('btn-copy').disabled = false;
     document.getElementById('btn-regen').disabled = false;
     document.getElementById('btn-download').disabled = false;
+
+    // Increment usage counter (free tier tracking)
+    incrementUsage();
 
     // Save to history
     saveToHistory(input, format, tone, text, client);
@@ -2162,7 +2573,12 @@ function renderHistory() {
   const tbody = document.getElementById('history-tbody');
 
   if (history.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" class="no-history">No history yet.</td></tr>';
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state-card">
+      <div class="empty-icon">🕐</div>
+      <h3>No history yet</h3>
+      <p>Your repurposed content will appear here after your first generation.</p>
+      <button class="btn btn-primary" onclick="navigate('repurpose')">✦ Go Repurpose</button>
+    </div></td></tr>`;
     return;
   }
 
@@ -2226,7 +2642,12 @@ function renderClients() {
   const grid = document.getElementById('client-grid');
 
   if (clients.length === 0) {
-    grid.innerHTML = `<div class="no-clients"><div class="empty-icon">◈</div><p>No clients yet. Add your first client profile.</p></div>`;
+    grid.innerHTML = `<div class="empty-state-card" style="grid-column:1/-1;">
+      <div class="empty-icon">👥</div>
+      <h3>No clients yet</h3>
+      <p>Add your first client profile to tailor content to their voice, tone, and industry.</p>
+      <button class="btn btn-primary" onclick="openClientModal()">+ Add Your First Client</button>
+    </div>`;
     return;
   }
 
@@ -2535,7 +2956,6 @@ function escHtml(str) {
 (function init() {
   updateApiStatus();
   updateSidebarUser();
-  renderDashboard();
   handleLinkedInCallback();
 
   // Input counter on repurpose page
@@ -2550,6 +2970,17 @@ function escHtml(str) {
   document.getElementById('quickPostModal').addEventListener('click', function(e) {
     if (e.target === this) closeQuickPostModal();
   });
+  document.getElementById('upgradeModal').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
+  document.getElementById('onboardingModal').addEventListener('click', function(e) {
+    if (e.target === this) skipOnboarding();
+  });
+
+  // Show onboarding on first visit
+  if (!ls('reflow_onboarded', false)) {
+    document.getElementById('onboardingModal').classList.add('open');
+  }
 })();
 </script>
 </body>
