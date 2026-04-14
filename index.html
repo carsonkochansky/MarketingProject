@@ -13,6 +13,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="ReFlow — AI Content Repurposing" />
   <meta name="twitter:description" content="Turn any content into platform-ready posts in seconds." />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
     :root {
       --navy: #073b3f;
@@ -910,6 +911,36 @@
       .landing-hero h1 { font-size: 28px; }
     }
 
+    /* ── AUTH SCREEN ────────────────────────────── */
+    #auth-screen {
+      position: fixed; inset: 0; z-index: 9999;
+      background: var(--navy);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .auth-card {
+      background: white; border-radius: 16px; padding: 40px 36px;
+      width: 100%; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+    .auth-logo {
+      text-align: center; margin-bottom: 28px;
+    }
+    .auth-logo .app-name {
+      font-size: 28px; font-weight: 900; color: var(--navy); letter-spacing: -0.5px;
+    }
+    .auth-logo .app-name span { color: var(--coral); }
+    .auth-logo p { font-size: 13px; color: var(--text-light); margin-top: 4px; }
+    .auth-title { font-size: 18px; font-weight: 700; color: var(--text-dark); margin-bottom: 20px; text-align:center; }
+    #auth-error {
+      background: #fee2e2; color: #b91c1c; font-size: 13px;
+      padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; display: none;
+    }
+    .auth-toggle {
+      text-align: center; margin-top: 20px; font-size: 13px; color: var(--text-light);
+    }
+    .auth-toggle a { color: var(--coral); font-weight: 600; cursor: pointer; text-decoration: none; }
+    .auth-toggle a:hover { text-decoration: underline; }
+    #auth-loading { text-align:center; font-size:13px; color:var(--text-light); margin-top:12px; display:none; }
+
     /* ── LANDING PAGE ───────────────────────────── */
     #page-landing { max-width: 100%; padding: 0; }
     .landing-hero {
@@ -1089,6 +1120,8 @@
   <div class="sidebar-user">
     <div class="user-name" id="sb-user-name">Your Name</div>
     <div class="user-biz" id="sb-biz-name">Your Business</div>
+    <div id="sb-user-email" style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+    <button onclick="authSignOut()" style="margin-top:8px;background:none;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;width:100%;text-align:left;" onmouseover="this.style.borderColor='rgba(255,255,255,0.35)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.15)'">Log out</button>
   </div>
   <div class="sidebar-nav">
     <div class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')">
@@ -1115,8 +1148,53 @@
   </div>
 </nav>
 
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="app-name">Re<span>Flow</span></div>
+      <p>AI-powered content repurposing</p>
+    </div>
+    <div id="auth-error"></div>
+    <div id="auth-login-view">
+      <div class="auth-title">Log in to your account</div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="auth-email" placeholder="you@example.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="auth-password" placeholder="••••••••"
+          onkeydown="if(event.key==='Enter') authSubmit()" />
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-top:4px;" onclick="authSubmit()">Log In</button>
+      <div id="auth-loading">Signing in…</div>
+      <div class="auth-toggle">
+        Don't have an account? <a onclick="showAuthView('signup')">Sign up free</a>
+      </div>
+    </div>
+    <div id="auth-signup-view" style="display:none;">
+      <div class="auth-title">Create your account</div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="auth-email-signup" placeholder="you@example.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="auth-password-signup" placeholder="Min. 6 characters"
+          onkeydown="if(event.key==='Enter') authSignUp()" />
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-top:4px;" onclick="authSignUp()">Create Account</button>
+      <div id="auth-loading-signup">Creating account…</div>
+      <div class="auth-toggle">
+        Already have an account? <a onclick="showAuthView('login')">Log in</a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- MAIN -->
-<div id="main">
+<div id="main" style="display:none;">
   <div class="topbar">
     <div style="display:flex;align-items:center;gap:12px;">
       <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
@@ -1895,6 +1973,13 @@
 </div>
 
 <script>
+// ─── SUPABASE ────────────────────────────────────────────
+// REPLACE with your Supabase project values: supabase.com → Settings → API
+const SUPABASE_URL      = 'REPLACE_WITH_YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'REPLACE_WITH_YOUR_SUPABASE_ANON_KEY';
+const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let currentUser = null;
+
 // ─── STATE ───────────────────────────────────────────────
 let state = {
   currentPage: 'dashboard',
@@ -1906,15 +1991,19 @@ let state = {
 };
 
 // ─── STORAGE HELPERS ─────────────────────────────────────
+function userKey(key) {
+  return currentUser ? `${key}_${currentUser.id}` : key;
+}
+
 function ls(key, def = null) {
   try {
-    const v = localStorage.getItem(key);
+    const v = localStorage.getItem(userKey(key));
     return v !== null ? JSON.parse(v) : def;
   } catch { return def; }
 }
 
 function lsSet(key, val) {
-  localStorage.setItem(key, JSON.stringify(val));
+  localStorage.setItem(userKey(key), JSON.stringify(val));
 }
 
 function getSettings() {
@@ -2042,6 +2131,8 @@ function updateSidebarUser() {
   const s = getSettings();
   document.getElementById('sb-user-name').textContent = s.userName || 'Your Name';
   document.getElementById('sb-biz-name').textContent = s.bizName || 'Your Business';
+  const emailEl = document.getElementById('sb-user-email');
+  if (emailEl) emailEl.textContent = currentUser?.email || '';
 }
 
 // ─── DASHBOARD ────────────────────────────────────────────
@@ -2953,7 +3044,74 @@ function escHtml(str) {
 }
 
 // ─── INIT ─────────────────────────────────────────────────
-(function init() {
+// ─── AUTH ─────────────────────────────────────────────────
+function showAuthView(view) {
+  const err = document.getElementById('auth-error');
+  err.style.display = 'none';
+  document.getElementById('auth-login-view').style.display  = view === 'login'  ? 'block' : 'none';
+  document.getElementById('auth-signup-view').style.display = view === 'signup' ? 'block' : 'none';
+}
+
+function setAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+async function authSubmit() {
+  const email    = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const loading  = document.getElementById('auth-loading');
+  if (!email || !password) { setAuthError('Please enter your email and password.'); return; }
+  document.getElementById('auth-error').style.display = 'none';
+  loading.style.display = 'block';
+  const { error } = await _supabase.auth.signInWithPassword({ email, password });
+  loading.style.display = 'none';
+  if (error) setAuthError(error.message);
+}
+
+async function authSignUp() {
+  const email    = document.getElementById('auth-email-signup').value.trim();
+  const password = document.getElementById('auth-password-signup').value;
+  const loading  = document.getElementById('auth-loading-signup');
+  if (!email || !password) { setAuthError('Please enter your email and password.'); return; }
+  if (password.length < 6)  { setAuthError('Password must be at least 6 characters.'); return; }
+  document.getElementById('auth-error').style.display = 'none';
+  loading.style.display = 'block';
+  const { error } = await _supabase.auth.signUp({ email, password });
+  loading.style.display = 'none';
+  if (error) {
+    setAuthError(error.message);
+  } else {
+    setAuthError('');
+    document.getElementById('auth-error').style.background = '#dcfce7';
+    document.getElementById('auth-error').style.color = '#15803d';
+    document.getElementById('auth-error').textContent = 'Account created! Check your email to confirm, then log in.';
+    document.getElementById('auth-error').style.display = 'block';
+    showAuthView('login');
+  }
+}
+
+async function authSignOut() {
+  await _supabase.auth.signOut();
+}
+
+// Auth state listener — drives everything
+_supabase.auth.onAuthStateChange((event, session) => {
+  currentUser = session?.user ?? null;
+  if (currentUser) {
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('main').style.display = 'flex';
+    init();
+  } else {
+    document.getElementById('auth-screen').style.display = 'flex';
+    document.getElementById('main').style.display = 'none';
+    showAuthView('login');
+  }
+});
+
+// ─── APP INIT ────────────────────────────────────────────
+function init() {
   updateApiStatus();
   updateSidebarUser();
   handleLinkedInCallback();
@@ -2976,12 +3134,7 @@ function escHtml(str) {
   document.getElementById('onboardingModal').addEventListener('click', function(e) {
     if (e.target === this) skipOnboarding();
   });
-
-  // Show onboarding on first visit
-  if (!ls('reflow_onboarded', false)) {
-    document.getElementById('onboardingModal').classList.add('open');
-  }
-})();
+}
 </script>
 </body>
 </html>
